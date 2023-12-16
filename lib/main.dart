@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/router.dart';
+import 'package:spotiquiz/utils/colors.dart';
 
 void main() {
-  runApp(const MyApp());
+  final TrackCubit trackCubit = TrackCubit();
+  trackCubit.loadTracks();
+
+  runApp(
+    BlocProvider<TrackCubit>(
+      create: (_) => trackCubit,
+      child: const MyApp(),
+    ),
+  );
+
+  // runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -13,7 +26,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'SpotiQuiz',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0x1DB954)),
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
