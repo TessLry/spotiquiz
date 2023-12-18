@@ -1,6 +1,7 @@
 class Artist {
-  final int id;
+  final String id;
   final String name;
+  final String? image;
 
-  Artist({required this.id, required this.name});
+  Artist({required this.id, required this.name, this.image});
 }
