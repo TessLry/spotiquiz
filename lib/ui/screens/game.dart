@@ -16,7 +16,8 @@ class Game extends StatefulWidget {
 
 class _GameState extends State<Game> {
   String _answer = "";
-  int timeLeft = 5;
+  int _timeLeft = 5;
+  int _score = 0;
   final TextEditingController _textFieldController = TextEditingController();
 
   AudioPlayer audioPlayer = AudioPlayer();
@@ -28,8 +29,8 @@ class _GameState extends State<Game> {
   void _startCountDown() {
     Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
-        if (timeLeft > 0) {
-          timeLeft--;
+        if (_timeLeft > 0) {
+          _timeLeft--;
         } else {
           timer.cancel();
           startGame();
@@ -40,18 +41,39 @@ class _GameState extends State<Game> {
 
   void handleSubmit(value) {
     if (value == _answer) {
-      audioPlayer
-          .getCurrentPosition()
-          .then((value) => print(value)); //To calculate score
+      int duration = 30;
+      int currentScore = 0;
+      audioPlayer.getCurrentPosition().then((value) {
+        currentScore = ((value?.inSeconds ?? 0 / duration) * 100).round();
+        print("current score " + currentScore.toString());
+      });
+
       BlocProvider.of<TrackCubit>(context).removeTrack();
       if (BlocProvider.of<TrackCubit>(context).state.isEmpty) {
         Navigator.of(context).pop();
       }
       audioPlayer.stop();
-      timeLeft = 5;
+      _timeLeft = 5;
       _startCountDown();
       _textFieldController.clear();
       setState(() {});
+    }
+  }
+
+  void calculateScore() async {
+    try {
+      Duration? duration = await audioPlayer.getDuration();
+      Duration? position = await audioPlayer.getCurrentPosition();
+
+      if (duration != null && position != null) {
+        _score =
+            ((position.inMilliseconds / duration.inMilliseconds) * 100).round();
+        print(_score);
+      } else {
+        print('Impossible de récupérer la durée ou la position actuelle.');
+      }
+    } catch (e) {
+      print('Erreur lors du calcul du score : $e');
     }
   }
 
@@ -100,11 +122,11 @@ class _GameState extends State<Game> {
                                 borderRadius: BorderRadius.circular(10)),
                             margin: const EdgeInsets.only(
                                 top: 40, left: 60, right: 60, bottom: 40),
-                            child: timeLeft <= 0
+                            child: _timeLeft <= 0
                                 ? Lottie.asset("assets/music_playing.json")
                                 : Center(
                                     child: Text(
-                                      timeLeft.toString(),
+                                      _timeLeft.toString(),
                                       style: const TextStyle(
                                         fontSize: 30,
                                         fontWeight: FontWeight.bold,
@@ -120,35 +142,59 @@ class _GameState extends State<Game> {
                 flex: 6,
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: TextField(
-                            controller: _textFieldController,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'Réponse',
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          top: 0, bottom: 0, left: 40, right: 40),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: TextField(
+                              controller: _textFieldController,
+                              decoration: const InputDecoration(
+                                prefixIcon: Icon(Icons.music_note),
+                                prefixIconColor: Colors.grey,
+                                labelText: 'Réponse',
+                              ),
                             ),
                           ),
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            //not rounded
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
-                          onPressed: () {
-                            handleSubmit(_textFieldController.text);
-                          },
-                          child: const Text(
-                            'Suivant',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    )
+                          // ElevatedButton(
+                          //   style: ElevatedButton.styleFrom(
+                          //     backgroundColor: Colors.green,
+                          //     shape: const RoundedRectangleBorder(
+                          //       borderRadius: BorderRadius.zero,
+                          //     ),
+                          //   ),
+                          //   onPressed: () {
+                          //     handleSubmit(_textFieldController.text);
+                          //   },
+                          //   child: const Text(
+                          //     'Suivant',
+                          //     style: TextStyle(color: Colors.white),
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                        child: ListView.builder(
+                            itemCount: BlocProvider.of<TrackCubit>(context)
+                                .state
+                                .length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(
+                                  BlocProvider.of<TrackCubit>(context)
+                                      .state[index]
+                                      .name,
+                                ),
+                                onTap: () {
+                                  handleSubmit(
+                                      BlocProvider.of<TrackCubit>(context)
+                                          .state[index]
+                                          .name);
+                                },
+                              );
+                            }))
                   ],
                 ),
               )
