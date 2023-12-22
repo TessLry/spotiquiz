@@ -44,8 +44,12 @@ class _GameState extends State<Game> {
       int duration = 30;
       int currentScore = 0;
       audioPlayer.getCurrentPosition().then((value) {
-        currentScore = ((value?.inSeconds ?? 0 / duration) * 100).round();
+        // currentScore = ((value?.inSeconds ?? 0 / duration) * 100).round();
+        currentScore = (duration - (value?.inSeconds ?? 0)) * 100;
         print("current score " + currentScore.toString());
+        setState(() {
+          _score += currentScore;
+        });
       });
 
       BlocProvider.of<TrackCubit>(context).removeTrack();
@@ -66,8 +70,10 @@ class _GameState extends State<Game> {
       Duration? position = await audioPlayer.getCurrentPosition();
 
       if (duration != null && position != null) {
-        _score =
-            ((position.inMilliseconds / duration.inMilliseconds) * 100).round();
+        setState(() {
+          _score = ((position.inMilliseconds / duration.inMilliseconds) * 100)
+              .round();
+        });
         print(_score);
       } else {
         print('Impossible de récupérer la durée ou la position actuelle.');
@@ -135,6 +141,14 @@ class _GameState extends State<Game> {
                                   )),
                       );
                     }).toList(),
+                    Positioned(
+                        right: 10,
+                        top: 10,
+                        child: Text(_score.toString(),
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ))),
                   ],
                 )),
               ),
