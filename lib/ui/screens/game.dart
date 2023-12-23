@@ -18,6 +18,7 @@ class _GameState extends State<Game> {
   String _answer = "";
   int _timeLeft = 5;
   int _score = 0;
+  List<Track> _autoCompleteTracks = [];
   final TextEditingController _textFieldController = TextEditingController();
 
   AudioPlayer audioPlayer = AudioPlayer();
@@ -44,9 +45,7 @@ class _GameState extends State<Game> {
       int duration = 30;
       int currentScore = 0;
       audioPlayer.getCurrentPosition().then((value) {
-        // currentScore = ((value?.inSeconds ?? 0 / duration) * 100).round();
         currentScore = (duration - (value?.inSeconds ?? 0)) * 100;
-        print("current score " + currentScore.toString());
         setState(() {
           _score += currentScore;
         });
@@ -60,26 +59,8 @@ class _GameState extends State<Game> {
       _timeLeft = 5;
       _startCountDown();
       _textFieldController.clear();
+      _autoCompleteTracks = [];
       setState(() {});
-    }
-  }
-
-  void calculateScore() async {
-    try {
-      Duration? duration = await audioPlayer.getDuration();
-      Duration? position = await audioPlayer.getCurrentPosition();
-
-      if (duration != null && position != null) {
-        setState(() {
-          _score = ((position.inMilliseconds / duration.inMilliseconds) * 100)
-              .round();
-        });
-        print(_score);
-      } else {
-        print('Impossible de récupérer la durée ou la position actuelle.');
-      }
-    } catch (e) {
-      print('Erreur lors du calcul du score : $e');
     }
   }
 
@@ -169,43 +150,32 @@ class _GameState extends State<Game> {
                                 prefixIconColor: Colors.grey,
                                 labelText: 'Réponse',
                               ),
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value.isEmpty) {
+                                    _autoCompleteTracks = [];
+                                    return;
+                                  }
+                                  _autoCompleteTracks = tracks
+                                      .where((track) => track.name
+                                          .toLowerCase()
+                                          .contains(value.toLowerCase()))
+                                      .toList();
+                                });
+                              },
                             ),
                           ),
-                          // ElevatedButton(
-                          //   style: ElevatedButton.styleFrom(
-                          //     backgroundColor: Colors.green,
-                          //     shape: const RoundedRectangleBorder(
-                          //       borderRadius: BorderRadius.zero,
-                          //     ),
-                          //   ),
-                          //   onPressed: () {
-                          //     handleSubmit(_textFieldController.text);
-                          //   },
-                          //   child: const Text(
-                          //     'Suivant',
-                          //     style: TextStyle(color: Colors.white),
-                          //   ),
-                          // ),
                         ],
                       ),
                     ),
                     Expanded(
                         child: ListView.builder(
-                            itemCount: BlocProvider.of<TrackCubit>(context)
-                                .state
-                                .length,
+                            itemCount: _autoCompleteTracks.length,
                             itemBuilder: (context, index) {
                               return ListTile(
-                                title: Text(
-                                  BlocProvider.of<TrackCubit>(context)
-                                      .state[index]
-                                      .name,
-                                ),
+                                title: Text(_autoCompleteTracks[index].name),
                                 onTap: () {
-                                  handleSubmit(
-                                      BlocProvider.of<TrackCubit>(context)
-                                          .state[index]
-                                          .name);
+                                  handleSubmit(_autoCompleteTracks[index].name);
                                 },
                               );
                             }))

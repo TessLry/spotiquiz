@@ -10,7 +10,7 @@ class TrackCubit extends Cubit<List<Track>> {
     emit([
       Track(
           id: 1,
-          name: 'Track 1',
+          name: 'La misère est si belle',
           isPlayable: true,
           previewUrl:
               "https://p.scdn.co/mp3-preview/9dd0f5f1cad12520a4666e6e0e6d40fd68449596?cid=1f4c9a02a92f4e9989a00dc8f91c2fa3",
@@ -23,7 +23,7 @@ class TrackCubit extends Cubit<List<Track>> {
           artist: Artist(id: 1, name: 'Artist 1')),
       Track(
           id: 2,
-          name: 'Track 2',
+          name: 'Pnl',
           isPlayable: true,
           previewUrl:
               "https://p.scdn.co/mp3-preview/464aaab708a6e5cde70994d77bfda21395d7d9f7?cid=1f4c9a02a92f4e9989a00dc8f91c2fa3",
@@ -36,7 +36,7 @@ class TrackCubit extends Cubit<List<Track>> {
           artist: Artist(id: 2, name: 'Artist 2')),
       Track(
           id: 3,
-          name: 'Track 3',
+          name: 'J\'comprends pas',
           isPlayable: true,
           previewUrl:
               "https://p.scdn.co/mp3-preview/b25ea634fb5aabe7d6dba3cad603a590e09afbdd?cid=1f4c9a02a92f4e9989a00dc8f91c2fa3",
