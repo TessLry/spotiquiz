@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotiquiz/ui/widgets/search_album.dart';
 import 'package:spotiquiz/ui/widgets/search_artist.dart';
+import 'package:spotiquiz/ui/widgets/select_nb_question.dart';
 import 'package:spotiquiz/utils/colors.dart';
 
 class Home extends StatelessWidget {
@@ -24,6 +25,18 @@ class Home extends StatelessWidget {
         body: Column(
           children: [
             Text('Search for an artist or an album'),
+            SelectNbQuestion(),
+            // DropdownButton<String>(
+            //   value: 'artist',
+            //   onChanged: (String? newValue) {},
+            //   items: <String>['artist', 'album']
+            //       .map<DropdownMenuItem<String>>((String value) {
+            //     return DropdownMenuItem<String>(
+            //       value: value,
+            //       child: Text(value),
+            //     );
+            //   }).toList(),
+            // ),
             Expanded(child: SearchArtist()),
             Expanded(child: SearchAlbum()),
           ],
