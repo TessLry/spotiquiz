@@ -39,49 +39,62 @@ class _HomeState extends State<Home> {
             ),
           ],
         ),
-        body: Column(
-          children: [
-            const Text('Search for an artist or an album'),
-            SelectNbQuestion(
-              onToggle: (value) {
-                setState(() {
-                  nbQuestion = value;
-                });
-              },
-            ),
-            ToogleButton(
-              onToggle: (value) {
-                setState(() {
-                  selectedToggle = value;
-                });
-              },
-            ),
-            Expanded(
-              child: selectedToggle == 'artist'
-                  ? SearchArtist(
-                      onToggle: (value) {
-                        artist = value;
-                      },
-                    )
-                  : SearchAlbum(
-                      onToggle: (value) {
-                        album = value;
-                      },
-                    ),
-            ),
-          ],
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              const Text('Search for an artist or an album'),
+              SelectNbQuestion(
+                onToggle: (value) {
+                  setState(() {
+                    nbQuestion = value;
+                  });
+                },
+              ),
+              ToogleButton(
+                onToggle: (value) {
+                  setState(() {
+                    selectedToggle = value;
+                  });
+                },
+              ),
+              Expanded(
+                child: selectedToggle == 'artist'
+                    ? SearchArtist(
+                        onToggle: (value) {
+                          artist = value;
+                        },
+                      )
+                    : SearchAlbum(
+                        onToggle: (value) {
+                          album = value;
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             final TrackRepository trackRepository = TrackRepository();
 
-            trackRepository
-                .getTracksByArtist(artist!, nbQuestion)
-                .then((List<Track> tracks) {
-              context.read<TrackCubit>().setTracks(tracks);
+            if (selectedToggle == 'artist') {
+              trackRepository
+                  .getTracksByArtist(artist!, nbQuestion)
+                  .then((List<Track> tracks) {
+                context.read<TrackCubit>().setTracks(tracks);
 
-              Navigator.pushNamed(context, '/game');
-            });
+                Navigator.pushNamed(context, '/game');
+              });
+            } else {
+              trackRepository
+                  .getTracksByAlbum(album!, nbQuestion)
+                  .then((List<Track> tracks) {
+                context.read<TrackCubit>().setTracks(tracks);
+
+                Navigator.pushNamed(context, '/game');
+              });
+            }
           },
           backgroundColor: AppColors.primary,
           child: const Icon(Icons.play_arrow),
