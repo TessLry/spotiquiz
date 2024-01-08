@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/models/track.dart';
+import 'package:spotiquiz/utils/colors.dart';
 
 class Game extends StatefulWidget {
   const Game({super.key});
@@ -14,11 +17,13 @@ class Game extends StatefulWidget {
   State<Game> createState() => _GameState();
 }
 
-class _GameState extends State<Game> {
+class _GameState extends State<Game> with TickerProviderStateMixin {
   String _answer = "";
   int _timeLeft = 5;
   int _score = 0;
   List<Track> _autoCompleteTracks = [];
+  Timer? _timer;
+  AnimationController? _animationController;
   final TextEditingController _textFieldController = TextEditingController();
 
   AudioPlayer audioPlayer = AudioPlayer();
@@ -28,10 +33,12 @@ class _GameState extends State<Game> {
   }
 
   void _startCountDown() {
-    Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_timeLeft > 0) {
           _timeLeft--;
+          _animationController?.reset();
+          _animationController?.forward();
         } else {
           timer.cancel();
           startGame();
@@ -75,9 +82,22 @@ class _GameState extends State<Game> {
   void initState() {
     super.initState();
 
+    _animationController = AnimationController(
+      vsync: this,
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startCountDown();
     });
+  }
+
+  @override
+  void dispose() {
+    audioPlayer.dispose();
+    _timer?.cancel();
+    _animationController?.dispose();
+
+    super.dispose();
   }
 
   @override
@@ -97,34 +117,48 @@ class _GameState extends State<Game> {
                   children: [
                     ...tracks.map((track) {
                       int index = tracks.indexOf(track);
-                      return Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: index * 4.0,
+                      return AnimatedPositioned(
+                        duration: const Duration(milliseconds: 400),
+                        width: MediaQuery.of(context).size.width - 120,
+                        height: MediaQuery.of(context).size.height * 0.4 - 80,
+                        left: index != tracks.length - 1
+                            ? 60
+                            : MediaQuery.of(context).size.width,
+                        bottom: index * 4.0 + 40,
                         child: Card(
                             elevation: 8,
                             color: Colors.white,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10)),
-                            margin: const EdgeInsets.only(
-                                top: 40, left: 60, right: 60, bottom: 40),
                             child: _timeLeft <= 0
-                                ? Lottie.asset("assets/music_playing.json")
+                                ? ScaleTransition(
+                                    scale: _animationController!
+                                        .drive(Tween<double>(
+                                      begin: 0.0,
+                                      end: 1.0,
+                                    )),
+                                    child: Lottie.asset(
+                                        'assets/music_playing.json'),
+                                  )
                                 : Center(
                                     child: Text(
-                                      _timeLeft.toString(),
-                                      style: const TextStyle(
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    _timeLeft.toString(),
+                                    style: TextStyle(
+                                      fontSize: 50 - _timeLeft * 5,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  )),
+                                  )
+                                        .animate(
+                                            controller: _animationController)
+                                        .fadeIn()
+                                        .slideY()
+                                        .then()
+                                        .shake())),
                       );
                     }).toList(),
                     Positioned(
                         right: 10,
-                        top: 10,
+                        top: 0,
                         child: Text(_score.toString(),
                             style: const TextStyle(
                               fontSize: 30,
