@@ -24,8 +24,6 @@ class _HomeState extends State<Home> {
   Artist? artist;
   Album? album;
 
-  List<Track> tracks = [];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,10 +78,6 @@ class _HomeState extends State<Home> {
             trackRepository
                 .getTracksByArtist(artist!, nbQuestion)
                 .then((List<Track> tracks) {
-              setState(() {
-                this.tracks = tracks;
-              });
-
               context.read<TrackCubit>().setTracks(tracks);
 
               Navigator.pushNamed(context, '/game');

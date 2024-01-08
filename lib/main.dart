@@ -6,7 +6,6 @@ import 'package:spotiquiz/utils/colors.dart';
 
 void main() {
   final TrackCubit trackCubit = TrackCubit();
-  trackCubit.loadTracks();
 
   runApp(
     BlocProvider<TrackCubit>(
