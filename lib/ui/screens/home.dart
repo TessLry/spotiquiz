@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/models/album.dart';
 import 'package:spotiquiz/models/artist.dart';
 import 'package:spotiquiz/models/track.dart';
@@ -41,7 +43,7 @@ class _HomeState extends State<Home> {
         ),
         body: Column(
           children: [
-            Text('Search for an artist or an album'),
+            const Text('Search for an artist or an album'),
             SelectNbQuestion(
               onToggle: (value) {
                 setState(() {
@@ -69,20 +71,26 @@ class _HomeState extends State<Home> {
                       },
                     ),
             ),
-            FloatingActionButton(
-              onPressed: () async {
-                final TrackRepository trackRepository = TrackRepository();
-                final List<Track> tracks = await trackRepository
-                    .getTracksByArtist(artist!, nbQuestion);
-                setState(() {
-                  this.tracks = tracks;
-                });
-                print(tracks.toString());
-              },
-              backgroundColor: AppColors.primary,
-              child: const Icon(Icons.play_arrow),
-            )
           ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            final TrackRepository trackRepository = TrackRepository();
+
+            trackRepository
+                .getTracksByArtist(artist!, nbQuestion)
+                .then((List<Track> tracks) {
+              setState(() {
+                this.tracks = tracks;
+              });
+
+              context.read<TrackCubit>().setTracks(tracks);
+
+              Navigator.pushNamed(context, '/game');
+            });
+          },
+          backgroundColor: AppColors.primary,
+          child: const Icon(Icons.play_arrow),
         ));
   }
 }

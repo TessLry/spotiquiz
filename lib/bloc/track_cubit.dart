@@ -50,13 +50,15 @@ class TrackCubit extends Cubit<List<Track>> {
     ]);
   }
 
+  Future<void> setTracks(List<Track> tracks) async {
+    emit(tracks);
+  }
+
   Future<void> addTrack(Track track) async {
     emit([...state, track]);
   }
 
   Future<void> removeTrack() async {
-    // emit(state.sublist(1));
-    //Remove the first element of the list
     state.removeAt(0);
     emit(state);
   }

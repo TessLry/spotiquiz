@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/models/track.dart';
-import 'package:spotiquiz/utils/colors.dart';
 
 class Game extends StatefulWidget {
   const Game({super.key});
@@ -19,7 +17,7 @@ class Game extends StatefulWidget {
 
 class _GameState extends State<Game> with TickerProviderStateMixin {
   String _answer = "";
-  int _timeLeft = 5;
+  int _timeLeft = 3;
   int _score = 0;
   List<Track> _autoCompleteTracks = [];
   Timer? _timer;
