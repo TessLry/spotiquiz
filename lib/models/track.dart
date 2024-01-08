@@ -1,8 +1,8 @@
-import 'package:spotiquiz/models/Artist.dart';
+import 'package:spotiquiz/models/artist.dart';
 import 'package:spotiquiz/models/album.dart';
 
 class Track {
-  final int id;
+  final String id;
   final String name;
   final bool isPlayable;
   final String? previewUrl;

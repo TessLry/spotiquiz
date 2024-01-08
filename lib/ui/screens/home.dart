@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spotiquiz/models/album.dart';
 import 'package:spotiquiz/models/artist.dart';
+import 'package:spotiquiz/models/track.dart';
+import 'package:spotiquiz/repositories/track_repository.dart';
 import 'package:spotiquiz/ui/widgets/search_album.dart';
 import 'package:spotiquiz/ui/widgets/search_artist.dart';
 import 'package:spotiquiz/ui/widgets/select_nb_question.dart';
@@ -19,6 +21,8 @@ class _HomeState extends State<Home> {
   int nbQuestion = 5;
   Artist? artist;
   Album? album;
+
+  List<Track> tracks = [];
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +69,19 @@ class _HomeState extends State<Home> {
                       },
                     ),
             ),
+            FloatingActionButton(
+              onPressed: () async {
+                final TrackRepository trackRepository = TrackRepository();
+                final List<Track> tracks = await trackRepository
+                    .getTracksByArtist(artist!, nbQuestion);
+                setState(() {
+                  this.tracks = tracks;
+                });
+                print(tracks.toString());
+              },
+              backgroundColor: AppColors.primary,
+              child: const Icon(Icons.play_arrow),
+            )
           ],
         ));
   }

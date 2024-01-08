@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spotiquiz/models/Artist.dart';
+import 'package:spotiquiz/models/artist.dart';
 import 'package:spotiquiz/models/album.dart';
 import 'package:spotiquiz/models/track.dart';
 
@@ -9,7 +9,7 @@ class TrackCubit extends Cubit<List<Track>> {
   Future<void> loadTracks() async {
     emit([
       Track(
-          id: 1,
+          id: '1',
           name: 'Track 1',
           isPlayable: true,
           album: Album(
@@ -20,7 +20,7 @@ class TrackCubit extends Cubit<List<Track>> {
               releaseDate: '2023-12-16'),
           artist: Artist(id: '1', name: 'Artist 1')),
       Track(
-          id: 2,
+          id: '2',
           name: 'Track 2',
           isPlayable: true,
           album: Album(
@@ -31,7 +31,7 @@ class TrackCubit extends Cubit<List<Track>> {
               releaseDate: '2023-12-16'),
           artist: Artist(id: '2', name: 'Artist 2')),
       Track(
-          id: 3,
+          id: '3',
           name: 'Track 3',
           isPlayable: true,
           album: Album(
