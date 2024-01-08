@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:spotiquiz/models/album.dart';
+import 'package:spotiquiz/models/artist.dart';
 import 'package:spotiquiz/ui/widgets/search_album.dart';
 import 'package:spotiquiz/ui/widgets/search_artist.dart';
 import 'package:spotiquiz/ui/widgets/select_nb_question.dart';
@@ -15,6 +17,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   String selectedToggle = 'artist';
   int nbQuestion = 5;
+  Artist? artist;
+  Album? album;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +42,6 @@ class _HomeState extends State<Home> {
               onToggle: (value) {
                 setState(() {
                   nbQuestion = value;
-                  print(nbQuestion);
                 });
               },
             ),
@@ -50,8 +53,17 @@ class _HomeState extends State<Home> {
               },
             ),
             Expanded(
-              child:
-                  selectedToggle == 'artist' ? SearchArtist() : SearchAlbum(),
+              child: selectedToggle == 'artist'
+                  ? SearchArtist(
+                      onToggle: (value) {
+                        artist = value;
+                      },
+                    )
+                  : SearchAlbum(
+                      onToggle: (value) {
+                        album = value;
+                      },
+                    ),
             ),
           ],
         ));

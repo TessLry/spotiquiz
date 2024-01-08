@@ -10,7 +10,6 @@ class SelectNbQuestion extends StatefulWidget {
 }
 
 class _SelectNbQuestionState extends State<SelectNbQuestion> {
-  // List<String> list = ["5", "10", "15", "20", "50", "100"];
   List<int> list = [5, 10, 15, 20, 50, 100];
   int dropdownValue = 5;
 

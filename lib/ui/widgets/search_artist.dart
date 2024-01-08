@@ -3,7 +3,9 @@ import 'package:spotiquiz/models/artist.dart';
 import 'package:spotiquiz/repositories/artist_repository.dart';
 
 class SearchArtist extends StatefulWidget {
-  const SearchArtist({super.key});
+  final ValueChanged<Artist> onToggle;
+
+  const SearchArtist({super.key, required this.onToggle});
 
   @override
   State<SearchArtist> createState() => _SearchArtistState();
@@ -12,18 +14,26 @@ class SearchArtist extends StatefulWidget {
 class _SearchArtistState extends State<SearchArtist> {
   List<Artist> _artists = [];
   final TextEditingController _textFieldController = TextEditingController();
+  bool _isFind = false;
 
   @override
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
       TextField(
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           labelText: 'Artiste',
           labelStyle: TextStyle(color: Colors.green),
+          suffixIcon: _isFind ? Icon(Icons.check) : Icon(Icons.search),
         ),
         controller: _textFieldController,
         onChanged: (String value) async {
-          if (value.trim().length < 3) return;
+          if (value == "" || value.trim().length < 2) {
+            setState(() {
+              _artists = [];
+            });
+            return;
+          }
+          _isFind = false;
           final ArtistRepository artistRepository = ArtistRepository();
           final List<Artist> artists =
               await artistRepository.getArtistInfo(value);
@@ -39,7 +49,18 @@ class _SearchArtistState extends State<SearchArtist> {
           final Artist artist = _artists[index];
           return ListTile(
             title: Text(artist.name),
-            leading: Image.network(artist.image ?? ""),
+            leading: artist.image == null
+                ? Icon(Icons.person, size: 50)
+                : Image.network(artist.image!,
+                    fit: BoxFit.cover, width: 50, height: 50),
+            onTap: () {
+              setState(() {
+                _textFieldController.text = artist.name;
+                _isFind = true;
+                _artists = [];
+              });
+              widget.onToggle(artist);
+            },
           );
         },
       ))

@@ -24,7 +24,8 @@ class AlbumRepository {
           albums.add(Album(
             id: album["id"],
             name: album["name"],
-            image: album["images"].length > 0 ? album["images"][2]["url"] : "",
+            image:
+                album["images"].length > 0 ? album["images"][2]["url"] : null,
             releaseDate: album["release_date"],
           ));
         }

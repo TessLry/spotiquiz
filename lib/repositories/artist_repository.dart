@@ -26,7 +26,7 @@ class ArtistRepository {
             id: artist["id"],
             name: artist["name"],
             image:
-                artist["images"].length > 0 ? artist["images"][2]["url"] : "",
+                artist["images"].length > 0 ? artist["images"][2]["url"] : null,
           ));
         }
       }

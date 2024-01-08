@@ -3,7 +3,9 @@ import 'package:spotiquiz/models/album.dart';
 import 'package:spotiquiz/repositories/album_repository.dart';
 
 class SearchAlbum extends StatefulWidget {
-  const SearchAlbum({super.key});
+  final ValueChanged<Album> onToggle;
+
+  const SearchAlbum({super.key, required this.onToggle});
 
   @override
   State<SearchAlbum> createState() => _SearchAlbumState();
@@ -12,18 +14,26 @@ class SearchAlbum extends StatefulWidget {
 class _SearchAlbumState extends State<SearchAlbum> {
   List<Album> _albums = [];
   final TextEditingController _textFieldController = TextEditingController();
+  bool _isFind = false;
 
   @override
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
       TextField(
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           labelText: 'Album',
           labelStyle: TextStyle(color: Colors.green),
+          suffixIcon: _isFind ? Icon(Icons.check) : Icon(Icons.search),
         ),
         controller: _textFieldController,
         onChanged: (String value) async {
-          if (value.trim().length < 2) return;
+          if (value == "" || value.trim().length < 2) {
+            setState(() {
+              _albums = [];
+            });
+            return;
+          }
+          _isFind = false;
           final AlbumRepository albumRepository = AlbumRepository();
           final List<Album> albums = await albumRepository.getAlbumInfo(value);
           setState(() {
@@ -38,7 +48,18 @@ class _SearchAlbumState extends State<SearchAlbum> {
           final Album album = _albums[index];
           return ListTile(
             title: Text(album.name),
-            leading: Image.network(album.image ?? ""),
+            leading: album.image == null
+                ? Icon(Icons.person, size: 50)
+                : Image.network(album.image!,
+                    fit: BoxFit.cover, width: 50, height: 50),
+            onTap: () {
+              setState(() {
+                _textFieldController.text = album.name;
+                _isFind = true;
+                _albums = [];
+              });
+              widget.onToggle(album);
+            },
           );
         },
       ))
