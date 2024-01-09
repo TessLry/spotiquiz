@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/router.dart';
 import 'package:spotiquiz/utils/colors.dart';
+import 'package:spotiquiz/utils/credentials.dart';
 
 void main() {
   final TrackCubit trackCubit = TrackCubit();
+  AppCredentials.fetchCredentials();
 
   runApp(
     BlocProvider<TrackCubit>(
