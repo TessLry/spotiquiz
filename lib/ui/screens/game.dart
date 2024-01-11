@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/models/track.dart';
+import 'package:spotiquiz/ui/widgets/countdown.dart';
 
 class Game extends StatefulWidget {
   const Game({super.key});
@@ -18,6 +18,7 @@ class Game extends StatefulWidget {
 class _GameState extends State<Game> with TickerProviderStateMixin {
   String _answer = "";
   int _timeLeft = 3;
+  int _songPosition = 0;
   int _score = 0;
   List<Track> _autoCompleteTracks = [];
   Timer? _timer;
@@ -28,6 +29,13 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
 
   Future<void> playMusic(previewUrl) async {
     await audioPlayer.play(UrlSource(previewUrl));
+
+    //update song duration
+    audioPlayer.onPositionChanged.listen((Duration d) {
+      setState(() {
+        _songPosition = d.inSeconds;
+      });
+    });
   }
 
   void _startCountDown() {
@@ -61,7 +69,8 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
         Navigator.of(context).pop();
       }
       audioPlayer.stop();
-      _timeLeft = 5;
+      _timeLeft = 3;
+      _songPosition = 0;
       _startCountDown();
       _textFieldController.clear();
       _autoCompleteTracks = [];
@@ -115,43 +124,59 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                   children: [
                     ...tracks.map((track) {
                       int index = tracks.indexOf(track);
-                      return AnimatedPositioned(
-                        duration: const Duration(milliseconds: 400),
+                      return Positioned(
                         width: MediaQuery.of(context).size.width - 120,
                         height: MediaQuery.of(context).size.height * 0.4 - 80,
-                        left: index != tracks.length - 1
-                            ? 60
-                            : MediaQuery.of(context).size.width,
+                        left: 60,
                         bottom: index * 4.0 + 40,
                         child: Card(
                             elevation: 8,
                             color: Colors.white,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10)),
-                            child: _timeLeft <= 0
-                                ? ScaleTransition(
-                                    scale: _animationController!
-                                        .drive(Tween<double>(
-                                      begin: 0.0,
-                                      end: 1.0,
-                                    )),
-                                    child: Lottie.asset(
-                                        'assets/music_playing.json'),
-                                  )
-                                : Center(
-                                    child: Text(
-                                    _timeLeft.toString(),
-                                    style: TextStyle(
-                                      fontSize: 50 - _timeLeft * 5,
-                                      fontWeight: FontWeight.bold,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: _timeLeft <= 0
+                                      ? ScaleTransition(
+                                          scale: _animationController!
+                                              .drive(Tween<double>(
+                                            begin: 0.0,
+                                            end: 1.0,
+                                          )),
+                                          child: Lottie.asset(
+                                              'assets/music_playing.json'),
+                                        )
+                                      : Center(
+                                          child: Coutdown(
+                                          timeLeft: _timeLeft,
+                                          animationController:
+                                              _animationController!,
+                                        )),
+                                ),
+                                if (index == tracks.length - 1 &&
+                                    _timeLeft <= 0)
+                                  AnimatedContainer(
+                                    duration: const Duration(seconds: 1),
+                                    height: 10,
+                                    //center
+
+                                    width: (MediaQuery.of(context).size.width -
+                                            120) *
+                                        ((30 - _songPosition) / 30),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade200,
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: const Radius.circular(10),
+                                        bottomRight: _songPosition < 2
+                                            ? const Radius.circular(10)
+                                            : Radius.zero,
+                                      ),
                                     ),
-                                  )
-                                        .animate(
-                                            controller: _animationController)
-                                        .fadeIn()
-                                        .slideY()
-                                        .then()
-                                        .shake())),
+                                  ),
+                              ],
+                            )),
                       );
                     }).toList(),
                     Positioned(
