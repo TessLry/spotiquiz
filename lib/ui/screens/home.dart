@@ -6,10 +6,12 @@ import 'package:spotiquiz/models/album.dart';
 import 'package:spotiquiz/models/artist.dart';
 import 'package:spotiquiz/models/track.dart';
 import 'package:spotiquiz/repositories/track_repository.dart';
+import 'package:spotiquiz/ui/widgets/rules.dart';
 import 'package:spotiquiz/ui/widgets/search_album.dart';
 import 'package:spotiquiz/ui/widgets/search_artist.dart';
 import 'package:spotiquiz/ui/widgets/select_nb_question.dart';
 import 'package:spotiquiz/ui/widgets/toogle_button.dart';
+import 'package:spotiquiz/utils/colors.dart';
 import 'package:spotiquiz/utils/credentials.dart';
 
 class Home extends StatefulWidget {
@@ -32,76 +34,110 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            IconButton(
-                onPressed: () async {
-                  await SpotifySdk.connectToSpotifyRemote(
-                      clientId: AppCredentials.spotifyId,
-                      redirectUrl: AppCredentials.redirectUrl);
-                },
-                icon: const Icon(Icons.connect_without_contact_rounded)),
-            IconButton(
-                onPressed: () async {
-                  String token = await SpotifySdk.getAccessToken(
-                      clientId: AppCredentials.spotifyId,
-                      redirectUrl: AppCredentials.redirectUrl,
-                      scope:
-                          "app-remote-control,user-modify-playback-state,playlist-read-private");
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              IconButton(
+                  onPressed: () async {
+                    await SpotifySdk.connectToSpotifyRemote(
+                        clientId: AppCredentials.spotifyId,
+                        redirectUrl: AppCredentials.redirectUrl);
+                  },
+                  icon: const Icon(Icons.connect_without_contact_rounded)),
+              IconButton(
+                  onPressed: () async {
+                    String token = await SpotifySdk.getAccessToken(
+                        clientId: AppCredentials.spotifyId,
+                        redirectUrl: AppCredentials.redirectUrl,
+                        scope:
+                            "app-remote-control,user-modify-playback-state,playlist-read-private");
 
-                  setState(() {
-                    AppCredentials.accessToken = token;
-                    print("token" + AppCredentials.accessToken);
-                  });
-                },
-                icon: const Icon(Icons.token_outlined)),
-          ],
-        ),
-        const Text('Search for an artist or an album'),
-        SelectNbQuestion(
-          onToggle: (value) {
-            setState(() {
-              nbQuestion = value;
-            });
-          },
-        ),
-        ToogleButton(
-          onToggle: (value) {
-            setState(() {
-              selectedToggle = value;
-            });
-          },
-        ),
-        Expanded(
-          child: selectedToggle == 'artist'
-              ? SearchArtist(
-                  onToggle: (value) {
-                    artist = value;
+                    setState(() {
+                      AppCredentials.accessToken = token;
+                      print("token" + AppCredentials.accessToken);
+                    });
                   },
-                )
-              : SearchAlbum(
-                  onToggle: (value) {
-                    album = value;
-                  },
+                  icon: const Icon(Icons.token_outlined)),
+            ],
+          ),
+          RichText(
+            text: const TextSpan(
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+              children: <TextSpan>[
+                TextSpan(text: 'Bienvenue sur '),
+                TextSpan(
+                  text: 'SpotiQuiz ',
+                  style: TextStyle(color: AppColors.primary),
                 ),
-        ),
-        ElevatedButton(
-            onPressed: () {
-              print("TETE");
-              final TrackRepository trackRepository = TrackRepository();
-
-              trackRepository
-                  .getTracksByArtist(artist!, nbQuestion)
-                  .then((List<Track> tracks) {
-                context.read<TrackCubit>().setTracks(tracks);
-
-                Navigator.pushNamed(context, '/game');
+                TextSpan(text: '!'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Rules(),
+          const SizedBox(height: 30),
+          ToogleButton(
+            onToggle: (value) {
+              setState(() {
+                selectedToggle = value;
               });
             },
-            child: Text("TEST"))
-      ],
+          ),
+          const SizedBox(height: 30),
+          SelectNbQuestion(
+            onToggle: (value) {
+              setState(() {
+                nbQuestion = value;
+              });
+            },
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: selectedToggle == 'artist'
+                ? SearchArtist(
+                    onToggle: (value) {
+                      artist = value;
+                    },
+                  )
+                : SearchAlbum(
+                    onToggle: (value) {
+                      album = value;
+                    },
+                  ),
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              final TrackRepository trackRepository = TrackRepository();
+
+              if (selectedToggle == 'artist') {
+                trackRepository
+                    .getTracksByArtist(artist!, nbQuestion)
+                    .then((List<Track> tracks) {
+                  context.read<TrackCubit>().setTracks(tracks);
+
+                  Navigator.pushNamed(context, '/game');
+                });
+              } else {
+                trackRepository
+                    .getTracksByAlbum(album!, nbQuestion)
+                    .then((List<Track> tracks) {
+                  context.read<TrackCubit>().setTracks(tracks);
+
+                  Navigator.pushNamed(context, '/game');
+                });
+              }
+            },
+            backgroundColor: AppColors.primary,
+            child: const Icon(Icons.play_arrow),
+          )
+        ],
+      ),
     );
   }
 }
