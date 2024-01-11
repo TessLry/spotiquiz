@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotify_sdk/spotify_sdk.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/models/album.dart';
 import 'package:spotiquiz/models/artist.dart';
@@ -8,8 +9,8 @@ import 'package:spotiquiz/repositories/track_repository.dart';
 import 'package:spotiquiz/ui/widgets/search_album.dart';
 import 'package:spotiquiz/ui/widgets/search_artist.dart';
 import 'package:spotiquiz/ui/widgets/select_nb_question.dart';
-import 'package:spotiquiz/utils/colors.dart';
 import 'package:spotiquiz/ui/widgets/toogle_button.dart';
+import 'package:spotiquiz/utils/credentials.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -25,66 +26,82 @@ class _HomeState extends State<Home> {
   Album? album;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('SpotiQuiz'),
-          backgroundColor: AppColors.primary,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () {
-                Navigator.pushNamed(context, '/settings');
-              },
-            ),
-          ],
-        ),
-        body: Column(
+    return Column(
+      children: [
+        Row(
           children: [
-            const Text('Search for an artist or an album'),
-            SelectNbQuestion(
-              onToggle: (value) {
-                setState(() {
-                  nbQuestion = value;
-                });
-              },
-            ),
-            ToogleButton(
-              onToggle: (value) {
-                setState(() {
-                  selectedToggle = value;
-                });
-              },
-            ),
-            Expanded(
-              child: selectedToggle == 'artist'
-                  ? SearchArtist(
-                      onToggle: (value) {
-                        artist = value;
-                      },
-                    )
-                  : SearchAlbum(
-                      onToggle: (value) {
-                        album = value;
-                      },
-                    ),
-            ),
+            IconButton(
+                onPressed: () async {
+                  await SpotifySdk.connectToSpotifyRemote(
+                      clientId: AppCredentials.spotifyId,
+                      redirectUrl: AppCredentials.redirectUrl);
+                },
+                icon: const Icon(Icons.connect_without_contact_rounded)),
+            IconButton(
+                onPressed: () async {
+                  String token = await SpotifySdk.getAccessToken(
+                      clientId: AppCredentials.spotifyId,
+                      redirectUrl: AppCredentials.redirectUrl,
+                      scope:
+                          "app-remote-control,user-modify-playback-state,playlist-read-private");
+
+                  setState(() {
+                    AppCredentials.accessToken = token;
+                    print("token" + AppCredentials.accessToken);
+                  });
+                },
+                icon: const Icon(Icons.token_outlined)),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            final TrackRepository trackRepository = TrackRepository();
-
-            trackRepository
-                .getTracksByArtist(artist!, nbQuestion)
-                .then((List<Track> tracks) {
-              context.read<TrackCubit>().setTracks(tracks);
-
-              Navigator.pushNamed(context, '/game');
+        const Text('Search for an artist or an album'),
+        SelectNbQuestion(
+          onToggle: (value) {
+            setState(() {
+              nbQuestion = value;
             });
           },
-          backgroundColor: AppColors.primary,
-          child: const Icon(Icons.play_arrow),
-        ));
+        ),
+        ToogleButton(
+          onToggle: (value) {
+            setState(() {
+              selectedToggle = value;
+            });
+          },
+        ),
+        Expanded(
+          child: selectedToggle == 'artist'
+              ? SearchArtist(
+                  onToggle: (value) {
+                    artist = value;
+                  },
+                )
+              : SearchAlbum(
+                  onToggle: (value) {
+                    album = value;
+                  },
+                ),
+        ),
+        ElevatedButton(
+            onPressed: () {
+              print("TETE");
+              final TrackRepository trackRepository = TrackRepository();
+
+              trackRepository
+                  .getTracksByArtist(artist!, nbQuestion)
+                  .then((List<Track> tracks) {
+                context.read<TrackCubit>().setTracks(tracks);
+
+                Navigator.pushNamed(context, '/game');
+              });
+            },
+            child: Text("TEST"))
+      ],
+    );
   }
 }

@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/router.dart';
+import 'package:spotiquiz/ui/navigations/navigation_tab_bar.dart';
 import 'package:spotiquiz/utils/colors.dart';
-import 'package:spotiquiz/utils/credentials.dart';
 
 void main() {
   final TrackCubit trackCubit = TrackCubit();
-  AppCredentials.fetchCredentials();
 
   runApp(
     BlocProvider<TrackCubit>(
@@ -24,12 +23,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SpotiQuiz',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-        useMaterial3: true,
+      themeMode: ThemeMode.dark,
+      darkTheme: ThemeData(
+        scaffoldBackgroundColor: AppColors.black,
+        brightness: Brightness.dark,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRouter.homePage,
+      home: const NavigationTabBar(),
       routes: AppRouter.routes,
     );
   }
