@@ -22,8 +22,9 @@ class _SelectNbQuestionState extends State<SelectNbQuestion> {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text('Sélectionner le nombre de questions :'),
+        const Text('Nombre de questions :'),
         const SizedBox(width: 10),
         DropdownMenu<int>(
           initialSelection: list.first,

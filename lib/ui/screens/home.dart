@@ -5,6 +5,7 @@ import 'package:spotiquiz/models/album.dart';
 import 'package:spotiquiz/models/artist.dart';
 import 'package:spotiquiz/models/track.dart';
 import 'package:spotiquiz/repositories/track_repository.dart';
+import 'package:spotiquiz/ui/widgets/rules.dart';
 import 'package:spotiquiz/ui/widgets/search_album.dart';
 import 'package:spotiquiz/ui/widgets/search_artist.dart';
 import 'package:spotiquiz/ui/widgets/select_nb_question.dart';
@@ -28,11 +29,14 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('SpotiQuiz'),
+          title: const Text('SpotiQuiz', style: TextStyle(color: Colors.white)),
           backgroundColor: AppColors.primary,
           actions: [
             IconButton(
-              icon: const Icon(Icons.settings),
+              icon: const Icon(
+                Icons.emoji_events_outlined,
+                color: Colors.white,
+              ),
               onPressed: () {
                 Navigator.pushNamed(context, '/settings');
               },
@@ -43,14 +47,26 @@ class _HomeState extends State<Home> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              const Text('Search for an artist or an album'),
-              SelectNbQuestion(
-                onToggle: (value) {
-                  setState(() {
-                    nbQuestion = value;
-                  });
-                },
+              RichText(
+                text: const TextSpan(
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  children: <TextSpan>[
+                    TextSpan(text: 'Bienvenue sur '),
+                    TextSpan(
+                      text: 'SpotiQuiz ',
+                      style: TextStyle(color: AppColors.primary),
+                    ),
+                    TextSpan(text: '!'),
+                  ],
+                ),
               ),
+              const SizedBox(height: 10),
+              const Rules(),
+              const SizedBox(height: 30),
               ToogleButton(
                 onToggle: (value) {
                   setState(() {
@@ -58,6 +74,15 @@ class _HomeState extends State<Home> {
                   });
                 },
               ),
+              const SizedBox(height: 30),
+              SelectNbQuestion(
+                onToggle: (value) {
+                  setState(() {
+                    nbQuestion = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 10),
               Expanded(
                 child: selectedToggle == 'artist'
                     ? SearchArtist(
