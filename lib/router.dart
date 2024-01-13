@@ -1,4 +1,4 @@
-import 'package:spotiquiz/ui/screens/score.dart';
+import 'package:spotiquiz/ui/screens/score_page.dart';
 import 'package:spotiquiz/ui/screens/game.dart';
 import 'package:spotiquiz/ui/screens/home.dart';
 
@@ -10,6 +10,6 @@ class AppRouter {
   static final routes = {
     homePage: (context) => const Home(),
     gamePage: (context) => const Game(),
-    scorePage: (context) => const Score(),
+    scorePage: (context) => const ScorePage(),
   };
 }

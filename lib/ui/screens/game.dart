@@ -4,9 +4,13 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:spotify_sdk/spotify_sdk.dart';
+import 'package:spotiquiz/bloc/score_cubit.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
+import 'package:spotiquiz/models/score.dart';
 import 'package:spotiquiz/models/track.dart';
 import 'package:spotiquiz/ui/widgets/countdown.dart';
+import 'package:spotiquiz/utils/colors.dart';
 
 class Game extends StatefulWidget {
   const Game({super.key});
@@ -66,6 +70,10 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
 
       BlocProvider.of<TrackCubit>(context).removeTrack();
       if (BlocProvider.of<TrackCubit>(context).state.isEmpty) {
+        BlocProvider.of<ScoreCubit>(context).addScore(Score(
+          _score,
+          DateTime.now(),
+        ));
         Navigator.of(context).pop();
       }
       audioPlayer.stop();
@@ -110,6 +118,28 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('SpotiQuiz',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              fontStyle: FontStyle.italic,
+              letterSpacing: 1.5,
+            )),
+        backgroundColor: AppColors.black,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () async {
+              await SpotifySdk.addToLibrary(
+                  spotifyUri:
+                      'spotify:track:${BlocProvider.of<TrackCubit>(context).state[0].id}');
+            },
+          )
+        ],
+      ),
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: BlocBuilder<TrackCubit, List<Track>>(
@@ -129,54 +159,31 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                         height: MediaQuery.of(context).size.height * 0.4 - 80,
                         left: 60,
                         bottom: index * 4.0 + 40,
-                        child: Card(
-                            elevation: 8,
-                            color: Colors.white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: _timeLeft <= 0
-                                      ? ScaleTransition(
-                                          scale: _animationController!
-                                              .drive(Tween<double>(
-                                            begin: 0.0,
-                                            end: 1.0,
-                                          )),
-                                          child: Lottie.asset(
-                                              'assets/music_playing.json'),
-                                        )
-                                      : Center(
-                                          child: Coutdown(
-                                          timeLeft: _timeLeft,
-                                          animationController:
-                                              _animationController!,
-                                        )),
-                                ),
-                                if (index == tracks.length - 1 &&
-                                    _timeLeft <= 0)
-                                  AnimatedContainer(
-                                    duration: const Duration(seconds: 1),
-                                    height: 10,
-                                    //center
-
-                                    width: (MediaQuery.of(context).size.width -
-                                            120) *
-                                        ((30 - _songPosition) / 30),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green.shade200,
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: const Radius.circular(10),
-                                        bottomRight: _songPosition < 2
-                                            ? const Radius.circular(10)
-                                            : Radius.zero,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            )),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Card(
+                              elevation: 8,
+                              shadowColor: Colors.black54,
+                              color: AppColors.black,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: _timeLeft <= 0
+                                  ? ScaleTransition(
+                                      scale: _animationController!
+                                          .drive(Tween<double>(
+                                        begin: 0.0,
+                                        end: 1.0,
+                                      )),
+                                      child: Lottie.asset(
+                                          'assets/music_playing.json'),
+                                    )
+                                  : Center(
+                                      child: Coutdown(
+                                      timeLeft: _timeLeft,
+                                      animationController:
+                                          _animationController!,
+                                    ))),
+                        ),
                       );
                     }).toList(),
                     Positioned(

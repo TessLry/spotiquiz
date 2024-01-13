@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotiquiz/bloc/score_cubit.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
+import 'package:spotiquiz/repositories/preferences_repository.dart';
 import 'package:spotiquiz/router.dart';
 import 'package:spotiquiz/ui/navigations/navigation_tab_bar.dart';
 import 'package:spotiquiz/utils/colors.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   final TrackCubit trackCubit = TrackCubit();
+  final ScoreCubit scoreCubit = ScoreCubit(PreferencesRepository());
+
+  scoreCubit.loadScores();
 
   runApp(
-    BlocProvider<TrackCubit>(
-      create: (_) => trackCubit,
+    MultiBlocProvider(
+      providers: [
+        BlocProvider<TrackCubit>(create: (_) => trackCubit),
+        BlocProvider<ScoreCubit>(create: (_) => scoreCubit),
+      ],
       child: const MyApp(),
     ),
   );

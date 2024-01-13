@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotiquiz/ui/screens/home.dart';
-import 'package:spotiquiz/ui/screens/score.dart';
+import 'package:spotiquiz/ui/screens/score_page.dart';
 
 class NavigationTabBar extends StatefulWidget {
   const NavigationTabBar({super.key});
@@ -12,7 +12,7 @@ class NavigationTabBar extends StatefulWidget {
 class _NavigationTabBarState extends State<NavigationTabBar> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[Home(), Score()];
+  static const List<Widget> _widgetOptions = <Widget>[Home(), ScorePage()];
 
   void _onItemTapped(int index) {
     setState(() {

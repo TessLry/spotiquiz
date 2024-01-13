@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class Coutdown extends StatefulWidget {
@@ -23,6 +23,7 @@ class _CoutdownState extends State<Coutdown> {
       style: TextStyle(
         fontSize: 50 - widget.timeLeft * 5,
         fontWeight: FontWeight.bold,
+        color: Colors.white,
       ),
     )
         .animate(controller: widget.animationController)
