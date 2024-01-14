@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotiquiz/bloc/score_cubit.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/models/album.dart';
 import 'package:spotiquiz/models/artist.dart';
+import 'package:spotiquiz/models/score.dart';
 import 'package:spotiquiz/models/track.dart';
 import 'package:spotiquiz/repositories/track_repository.dart';
 import 'package:spotiquiz/ui/widgets/rules.dart';
@@ -94,6 +96,9 @@ class _HomeState extends State<Home> {
                     .then((List<Track> tracks) {
                   context.read<TrackCubit>().setTracks(tracks);
 
+                  BlocProvider.of<ScoreCubit>(context).addScore(
+                      Score(0, DateTime.now(), artist!.name, artist!.image));
+
                   Navigator.pushNamed(context, '/game');
                 });
               } else {
@@ -101,6 +106,9 @@ class _HomeState extends State<Home> {
                     .getTracksByAlbum(album!, nbQuestion)
                     .then((List<Track> tracks) {
                   context.read<TrackCubit>().setTracks(tracks);
+
+                  BlocProvider.of<ScoreCubit>(context).addScore(
+                      Score(0, DateTime.now(), album!.name, album!.image));
 
                   Navigator.pushNamed(context, '/game');
                 });
