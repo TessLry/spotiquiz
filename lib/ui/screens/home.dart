@@ -95,7 +95,15 @@ class _HomeState extends State<Home> {
                       .then((List<Track> tracks) {
                     context.read<TrackCubit>().setTracks(tracks);
 
-                    Navigator.pushNamed(context, '/game');
+                    if (tracks[0].previewUrl == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Aucun extrait audio disponible'),
+                        ),
+                      );
+                    } else {
+                      Navigator.pushNamed(context, '/game');
+                    }
                   });
                 } else {
                   trackRepository
@@ -103,7 +111,15 @@ class _HomeState extends State<Home> {
                       .then((List<Track> tracks) {
                     context.read<TrackCubit>().setTracks(tracks);
 
-                    Navigator.pushNamed(context, '/game');
+                    if (tracks[0].previewUrl == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Aucun extrait audio disponible'),
+                        ),
+                      );
+                    } else {
+                      Navigator.pushNamed(context, '/game');
+                    }
                   });
                 }
               } else {

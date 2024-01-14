@@ -49,7 +49,7 @@ class _SearchAlbumState extends State<SearchAlbum> {
           return ListTile(
             title: Text(album.name),
             leading: album.image == null
-                ? Icon(Icons.person, size: 50)
+                ? Icon(Icons.album, size: 50)
                 : Image.network(album.image!,
                     fit: BoxFit.cover, width: 50, height: 50),
             onTap: () {
