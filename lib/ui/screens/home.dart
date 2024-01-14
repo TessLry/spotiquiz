@@ -115,22 +115,31 @@ class _HomeState extends State<Home> {
             onPressed: () {
               final TrackRepository trackRepository = TrackRepository();
 
-              if (selectedToggle == 'artist') {
-                trackRepository
-                    .getTracksByArtist(artist!, nbQuestion)
-                    .then((List<Track> tracks) {
-                  context.read<TrackCubit>().setTracks(tracks);
+              if (artist != null || album != null) {
+                if (selectedToggle == 'artist') {
+                  trackRepository
+                      .getTracksByArtist(artist!, nbQuestion)
+                      .then((List<Track> tracks) {
+                    context.read<TrackCubit>().setTracks(tracks);
 
-                  Navigator.pushNamed(context, '/game');
-                });
+                    Navigator.pushNamed(context, '/game');
+                  });
+                } else {
+                  trackRepository
+                      .getTracksByAlbum(album!, nbQuestion)
+                      .then((List<Track> tracks) {
+                    context.read<TrackCubit>().setTracks(tracks);
+
+                    Navigator.pushNamed(context, '/game');
+                  });
+                }
               } else {
-                trackRepository
-                    .getTracksByAlbum(album!, nbQuestion)
-                    .then((List<Track> tracks) {
-                  context.read<TrackCubit>().setTracks(tracks);
-
-                  Navigator.pushNamed(context, '/game');
-                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content:
+                        Text('Veuillez sélectionner un artiste ou un album'),
+                  ),
+                );
               }
             },
             backgroundColor: AppColors.primary,
