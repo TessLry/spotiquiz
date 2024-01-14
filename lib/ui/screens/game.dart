@@ -9,6 +9,7 @@ import 'package:spotiquiz/bloc/score_cubit.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/models/score.dart';
 import 'package:spotiquiz/models/track.dart';
+import 'package:spotiquiz/ui/widgets/animated_add_icon.dart';
 import 'package:spotiquiz/ui/widgets/countdown.dart';
 import 'package:spotiquiz/utils/colors.dart';
 
@@ -26,19 +27,22 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
   int _score = 0;
   List<Track> _autoCompleteTracks = [];
   Timer? _timer;
+  bool _isSongAdded = false;
   AnimationController? _animationController;
   final TextEditingController _textFieldController = TextEditingController();
 
   AudioPlayer audioPlayer = AudioPlayer();
 
-  Future<void> playMusic(previewUrl) async {
-    await audioPlayer.play(UrlSource(previewUrl));
+  @override
+  void initState() {
+    super.initState();
 
-    //update song duration
-    audioPlayer.onPositionChanged.listen((Duration d) {
-      setState(() {
-        _songPosition = d.inSeconds;
-      });
+    _animationController = AnimationController(
+      vsync: this,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startCountDown();
     });
   }
 
@@ -53,6 +57,23 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
           timer.cancel();
           startGame();
         }
+      });
+    });
+  }
+
+  void startGame() {
+    if (BlocProvider.of<TrackCubit>(context).state.isNotEmpty) {
+      playMusic(BlocProvider.of<TrackCubit>(context).state[0].previewUrl);
+      _answer = BlocProvider.of<TrackCubit>(context).state[0].name;
+    }
+  }
+
+  Future<void> playMusic(previewUrl) async {
+    await audioPlayer.play(UrlSource(previewUrl));
+
+    audioPlayer.onPositionChanged.listen((Duration d) {
+      setState(() {
+        _songPosition = d.inSeconds;
       });
     });
   }
@@ -79,31 +100,12 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
       audioPlayer.stop();
       _timeLeft = 3;
       _songPosition = 0;
+      _isSongAdded = false;
       _startCountDown();
       _textFieldController.clear();
       _autoCompleteTracks = [];
       setState(() {});
     }
-  }
-
-  void startGame() {
-    if (BlocProvider.of<TrackCubit>(context).state.isNotEmpty) {
-      playMusic(BlocProvider.of<TrackCubit>(context).state[0].previewUrl);
-      _answer = BlocProvider.of<TrackCubit>(context).state[0].name;
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _animationController = AnimationController(
-      vsync: this,
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startCountDown();
-    });
   }
 
   @override
@@ -130,13 +132,13 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
         backgroundColor: AppColors.black,
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () async {
-              await SpotifySdk.addToLibrary(
-                  spotifyUri:
-                      'spotify:track:${BlocProvider.of<TrackCubit>(context).state[0].id}');
-            },
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Text(_score.toString(),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                )),
           )
         ],
       ),
@@ -187,13 +189,38 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                       );
                     }).toList(),
                     Positioned(
-                        right: 10,
-                        top: 0,
-                        child: Text(_score.toString(),
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                            ))),
+                      left: 60,
+                      right: 60,
+                      bottom: 10,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Ajouter à mes titres likés",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
+                          AnimatedAddIcon(
+                            isAdd: _isSongAdded,
+                            onTap: () async {
+                              if (_isSongAdded) {
+                                return;
+                              }
+                              await SpotifySdk.addToLibrary(
+                                  spotifyUri:
+                                      'spotify:track:${BlocProvider.of<TrackCubit>(context).state[0].id}');
+
+                              setState(() {
+                                _isSongAdded = true;
+                              });
+                            },
+                          )
+                        ],
+                      ),
+                    ),
                   ],
                 )),
               ),
@@ -208,12 +235,19 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                         children: [
                           Flexible(
                             child: TextField(
+                              cursorColor: AppColors.primary,
                               controller: _textFieldController,
                               decoration: const InputDecoration(
-                                prefixIcon: Icon(Icons.music_note),
-                                prefixIconColor: Colors.grey,
-                                labelText: 'Réponse',
-                              ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: AppColors.primary, width: 2.0),
+                                  ),
+                                  fillColor: AppColors.primary,
+                                  prefixIcon: Icon(Icons.music_note),
+                                  prefixIconColor: AppColors.primary,
+                                  labelText: 'Réponse',
+                                  labelStyle:
+                                      TextStyle(color: AppColors.primary)),
                               onChanged: (value) {
                                 setState(() {
                                   if (value.isEmpty) {
