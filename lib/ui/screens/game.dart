@@ -9,7 +9,9 @@ import 'package:spotiquiz/bloc/score_cubit.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/models/score.dart';
 import 'package:spotiquiz/models/track.dart';
-import 'package:spotiquiz/ui/widgets/countdown.dart';
+import 'package:spotiquiz/ui/widgets/game/animated_add_icon.dart';
+import 'package:spotiquiz/ui/widgets/game/autocomplete_answer_input.dart';
+import 'package:spotiquiz/ui/widgets/game/countdown.dart';
 import 'package:spotiquiz/utils/colors.dart';
 
 class Game extends StatefulWidget {
@@ -20,29 +22,38 @@ class Game extends StatefulWidget {
 }
 
 class _GameState extends State<Game> with TickerProviderStateMixin {
+  late Track _currentTrack;
   String _answer = "";
+  String _gamePhase = "countdown";
   int _timeLeft = 3;
   int _songPosition = 0;
+  int _currentScore = 0;
   int _score = 0;
-  List<Track> _autoCompleteTracks = [];
   Timer? _timer;
+  bool _isSongAdded = false;
   AnimationController? _animationController;
   final TextEditingController _textFieldController = TextEditingController();
 
   AudioPlayer audioPlayer = AudioPlayer();
 
-  Future<void> playMusic(previewUrl) async {
-    await audioPlayer.play(UrlSource(previewUrl));
+  @override
+  void initState() {
+    super.initState();
 
-    //update song duration
-    audioPlayer.onPositionChanged.listen((Duration d) {
-      setState(() {
-        _songPosition = d.inSeconds;
-      });
+    _animationController = AnimationController(
+      vsync: this,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startCountDown();
+      _currentTrack = BlocProvider.of<TrackCubit>(context).state[0];
     });
   }
 
   void _startCountDown() {
+    setState(() {
+      _gamePhase = "countdown";
+    });
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_timeLeft > 0) {
@@ -57,53 +68,76 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
     });
   }
 
+  void startGame() {
+    setState(() {
+      _gamePhase = "playing";
+    });
+
+    if (BlocProvider.of<TrackCubit>(context).state.isNotEmpty) {
+      playMusic(_currentTrack.previewUrl);
+      _answer = _currentTrack.name;
+    }
+  }
+
+  Future<void> playMusic(previewUrl) async {
+    await audioPlayer.play(UrlSource(previewUrl));
+
+    audioPlayer.onPositionChanged.listen((Duration d) {
+      setState(() {
+        _songPosition = d.inSeconds;
+      });
+    });
+
+    audioPlayer.onPlayerComplete.listen((event) {
+      setState(() {
+        _textFieldController.clear();
+        _timeLeft = 3;
+        _songPosition = 0;
+        _currentScore = 0;
+        _gamePhase = "finished";
+      });
+    });
+  }
+
   void handleSubmit(value) {
     if (value == _answer) {
       int duration = 30;
-      int currentScore = 0;
+      _currentScore = 0;
       audioPlayer.getCurrentPosition().then((value) {
-        currentScore = (duration - (value?.inSeconds ?? 0)) * 100;
+        _currentScore = (duration - (value?.inSeconds ?? 0)) * 100;
         setState(() {
-          _score += currentScore;
+          _score += _currentScore;
         });
       });
-
-      BlocProvider.of<TrackCubit>(context).removeTrack();
-      if (BlocProvider.of<TrackCubit>(context).state.isEmpty) {
-        BlocProvider.of<ScoreCubit>(context).addScore(Score(
-          _score,
-          DateTime.now(),
-        ));
-        Navigator.of(context).pop();
-      }
+      _textFieldController.clear();
       audioPlayer.stop();
       _timeLeft = 3;
       _songPosition = 0;
-      _startCountDown();
-      _textFieldController.clear();
-      _autoCompleteTracks = [];
-      setState(() {});
+      setState(() {
+        _gamePhase = "finished";
+      });
     }
   }
 
-  void startGame() {
-    if (BlocProvider.of<TrackCubit>(context).state.isNotEmpty) {
-      playMusic(BlocProvider.of<TrackCubit>(context).state[0].previewUrl);
-      _answer = BlocProvider.of<TrackCubit>(context).state[0].name;
+  void handleNextSong() async {
+    await BlocProvider.of<TrackCubit>(context).removeTrack();
+    if (!context.mounted) return;
+
+    print(BlocProvider.of<TrackCubit>(context).state.toString());
+    if (BlocProvider.of<TrackCubit>(context).state.isEmpty) {
+      await BlocProvider.of<ScoreCubit>(context).addScore(Score(
+        _score,
+        DateTime.now(),
+      ));
+
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+      return;
     }
-  }
 
-  @override
-  void initState() {
-    super.initState();
-
-    _animationController = AnimationController(
-      vsync: this,
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startCountDown();
-    });
+    _currentTrack = BlocProvider.of<TrackCubit>(context).state[0];
+    _isSongAdded = false;
+    _startCountDown();
   }
 
   @override
@@ -130,13 +164,13 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
         backgroundColor: AppColors.black,
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () async {
-              await SpotifySdk.addToLibrary(
-                  spotifyUri:
-                      'spotify:track:${BlocProvider.of<TrackCubit>(context).state[0].id}');
-            },
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Text(_score.toString(),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                )),
           )
         ],
       ),
@@ -155,20 +189,29 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                     ...tracks.map((track) {
                       int index = tracks.indexOf(track);
                       return Positioned(
-                        width: MediaQuery.of(context).size.width - 120,
-                        height: MediaQuery.of(context).size.height * 0.4 - 80,
-                        left: 60,
-                        bottom: index * 4.0 + 40,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: Card(
-                              elevation: 8,
-                              shadowColor: Colors.black54,
-                              color: AppColors.black,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: _timeLeft <= 0
-                                  ? ScaleTransition(
+                          width: MediaQuery.of(context).size.width - 120,
+                          height: MediaQuery.of(context).size.height * 0.4 - 80,
+                          left: 60,
+                          bottom: index * 4.0 + 40,
+                          child: Padding(
+                              padding: const EdgeInsets.only(top: 20),
+                              child: Card(
+                                elevation: 8,
+                                shadowColor: Colors.black54,
+                                color: AppColors.black,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: (() {
+                                  if (_gamePhase == "countdown") {
+                                    return Center(
+                                      child: Countdown(
+                                        timeLeft: _timeLeft,
+                                        animationController:
+                                            _animationController!,
+                                      ),
+                                    );
+                                  } else if (_gamePhase == "playing") {
+                                    return ScaleTransition(
                                       scale: _animationController!
                                           .drive(Tween<double>(
                                         begin: 0.0,
@@ -176,76 +219,142 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                                       )),
                                       child: Lottie.asset(
                                           'assets/music_playing.json'),
-                                    )
-                                  : Center(
-                                      child: Coutdown(
-                                      timeLeft: _timeLeft,
-                                      animationController:
-                                          _animationController!,
-                                    ))),
-                        ),
-                      );
+                                    );
+                                  } else if (_gamePhase == "finished") {
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        const SizedBox(height: 20),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Image.network(
+                                                _currentTrack.album.image!,
+                                                fit: BoxFit.cover,
+                                                width: 40,
+                                                height: 40),
+                                            const SizedBox(width: 10),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  _currentTrack.name,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  "${_currentTrack.artist.name} \u2022  ${_currentTrack.album.name}",
+                                                  style: const TextStyle(
+                                                    color: AppColors.white,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            const Text(
+                                              "Ajouter à mes titres likés",
+                                              textAlign: TextAlign.left,
+                                              style: TextStyle(
+                                                fontStyle: FontStyle.italic,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            AnimatedAddIcon(
+                                              isAdd: _isSongAdded,
+                                              onTap: () async {
+                                                if (_isSongAdded) {
+                                                  return;
+                                                }
+                                                await SpotifySdk.addToLibrary(
+                                                    spotifyUri:
+                                                        'spotify:track:${_currentTrack.id}');
+
+                                                setState(() {
+                                                  _isSongAdded = true;
+                                                });
+                                              },
+                                            )
+                                          ],
+                                        ),
+                                        const SizedBox(height: 20),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Text(
+                                              _currentScore == 0
+                                                  ? "Dommage..."
+                                                  : "Bravo !",
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Text(
+                                              "+ $_currentScore pts",
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 20),
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 20, right: 20),
+                                          child: ElevatedButton(
+                                            onPressed: handleNextSong,
+                                            style: ElevatedButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 10),
+                                              backgroundColor: Colors.green,
+                                              foregroundColor: Colors.black,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(30),
+                                              ),
+                                            ),
+                                            child: const Text("Suivant"),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  } else {
+                                    return const Text(
+                                        "Une erreur est survenue");
+                                  }
+                                })(),
+                              )));
                     }).toList(),
-                    Positioned(
-                        right: 10,
-                        top: 0,
-                        child: Text(_score.toString(),
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                            ))),
                   ],
                 )),
               ),
               Expanded(
-                flex: 6,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 0, bottom: 0, left: 40, right: 40),
-                      child: Row(
-                        children: [
-                          Flexible(
-                            child: TextField(
-                              controller: _textFieldController,
-                              decoration: const InputDecoration(
-                                prefixIcon: Icon(Icons.music_note),
-                                prefixIconColor: Colors.grey,
-                                labelText: 'Réponse',
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value.isEmpty) {
-                                    _autoCompleteTracks = [];
-                                    return;
-                                  }
-                                  _autoCompleteTracks = tracks
-                                      .where((track) => track.name
-                                          .toLowerCase()
-                                          .contains(value.toLowerCase()))
-                                      .toList();
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                        child: ListView.builder(
-                            itemCount: _autoCompleteTracks.length,
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text(_autoCompleteTracks[index].name),
-                                onTap: () {
-                                  handleSubmit(_autoCompleteTracks[index].name);
-                                },
-                              );
-                            }))
-                  ],
-                ),
-              )
+                  flex: 6,
+                  child: AutocompleteAnswerInput(
+                      textFieldController: _textFieldController,
+                      trackList: tracks,
+                      handleSubmit: handleSubmit))
             ]);
           },
         ),

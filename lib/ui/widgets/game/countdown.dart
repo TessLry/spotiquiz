@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-class Coutdown extends StatefulWidget {
+class Countdown extends StatefulWidget {
   final int timeLeft;
   final AnimationController animationController;
 
-  const Coutdown({
+  const Countdown({
     super.key,
     required this.timeLeft,
     required this.animationController,
   });
 
   @override
-  State<Coutdown> createState() => _CoutdownState();
+  State<Countdown> createState() => _CountdownState();
 }
 
-class _CoutdownState extends State<Coutdown> {
+class _CountdownState extends State<Countdown> {
   @override
   Widget build(BuildContext context) {
     return Text(

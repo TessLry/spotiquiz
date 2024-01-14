@@ -4,7 +4,6 @@ import 'package:spotiquiz/bloc/score_cubit.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/repositories/preferences_repository.dart';
 import 'package:spotiquiz/router.dart';
-import 'package:spotiquiz/ui/navigations/navigation_tab_bar.dart';
 import 'package:spotiquiz/utils/colors.dart';
 
 void main() {
@@ -41,8 +40,9 @@ class MyApp extends StatelessWidget {
         highlightColor: Colors.transparent,
       ),
       debugShowCheckedModeBanner: false,
-      home: const NavigationTabBar(),
-      routes: AppRouter.routes,
+      initialRoute: AppRouter.loginPage,
+      // routes: AppRouter.routes,
+      onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }
 }
