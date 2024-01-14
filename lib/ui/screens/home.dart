@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spotify_sdk/spotify_sdk.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
 import 'package:spotiquiz/models/album.dart';
 import 'package:spotiquiz/models/artist.dart';
@@ -12,7 +11,6 @@ import 'package:spotiquiz/ui/widgets/search_artist.dart';
 import 'package:spotiquiz/ui/widgets/select_nb_question.dart';
 import 'package:spotiquiz/ui/widgets/toogle_button.dart';
 import 'package:spotiquiz/utils/colors.dart';
-import 'package:spotiquiz/utils/credentials.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -38,31 +36,6 @@ class _HomeState extends State<Home> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Row(
-            children: [
-              IconButton(
-                  onPressed: () async {
-                    await SpotifySdk.connectToSpotifyRemote(
-                        clientId: AppCredentials.spotifyId,
-                        redirectUrl: AppCredentials.redirectUrl);
-                  },
-                  icon: const Icon(Icons.connect_without_contact_rounded)),
-              IconButton(
-                  onPressed: () async {
-                    String token = await SpotifySdk.getAccessToken(
-                        clientId: AppCredentials.spotifyId,
-                        redirectUrl: AppCredentials.redirectUrl,
-                        scope:
-                            "app-remote-control,user-modify-playback-state,playlist-read-private");
-
-                    setState(() {
-                      AppCredentials.accessToken = token;
-                      print("token" + AppCredentials.accessToken);
-                    });
-                  },
-                  icon: const Icon(Icons.token_outlined)),
-            ],
-          ),
           RichText(
             text: const TextSpan(
               style: TextStyle(
