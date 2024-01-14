@@ -18,4 +18,19 @@ class ScoreCubit extends Cubit<List<Score>> {
 
     preferencesRepository.saveScore(state);
   }
+
+  Future<void> updateLastScore(int score) async {
+    final List<Score> scores = state;
+    scores.last.score = score;
+
+    emit([...scores]);
+
+    preferencesRepository.saveScore(state);
+  }
+
+  Future<void> resetScores() async {
+    emit([]);
+
+    preferencesRepository.saveScore(state);
+  }
 }

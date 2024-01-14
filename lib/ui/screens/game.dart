@@ -99,7 +99,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
     });
   }
 
-  void handleSubmit(value) {
+  bool handleSubmit(value) {
     if (value == _answer) {
       int duration = 30;
       _currentScore = 0;
@@ -116,19 +116,19 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
       setState(() {
         _gamePhase = "finished";
       });
+
+      return true;
     }
+
+    return false;
   }
 
   void handleNextSong() async {
     await BlocProvider.of<TrackCubit>(context).removeTrack();
     if (!context.mounted) return;
 
-    print(BlocProvider.of<TrackCubit>(context).state.toString());
     if (BlocProvider.of<TrackCubit>(context).state.isEmpty) {
-      await BlocProvider.of<ScoreCubit>(context).addScore(Score(
-        _score,
-        DateTime.now(),
-      ));
+      await BlocProvider.of<ScoreCubit>(context).updateLastScore(_score);
 
       if (!context.mounted) return;
       Navigator.of(context).pop();
@@ -236,27 +236,33 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                                                 width: 40,
                                                 height: 40),
                                             const SizedBox(width: 10),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  _currentTrack.name,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.bold,
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    _currentTrack.name,
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                                   ),
-                                                ),
-                                                Text(
-                                                  "${_currentTrack.artist.name} \u2022  ${_currentTrack.album.name}",
-                                                  style: const TextStyle(
-                                                    color: AppColors.white,
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w600,
+                                                  Text(
+                                                    "${_currentTrack.artist.name} \u2022  ${_currentTrack.album.name}",
+                                                    softWrap: false,
+                                                    overflow: TextOverflow.fade,
+                                                    style: const TextStyle(
+                                                      color: AppColors.white,
+                                                      fontSize: 10,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             )
                                           ],
                                         ),
