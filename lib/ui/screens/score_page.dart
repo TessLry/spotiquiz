@@ -37,20 +37,8 @@ class ScorePage extends StatelessWidget {
         ),
         Expanded(
           flex: 6,
-          child: Container(
+          child: SizedBox(
             width: double.infinity,
-            decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(color: AppColors.primary, width: 2.0),
-                left: BorderSide(color: AppColors.primary, width: 2.0),
-                right: BorderSide(color: AppColors.primary, width: 2.0),
-                bottom: BorderSide(color: AppColors.primary, width: 0.0),
-              ),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(40),
-                topRight: Radius.circular(40),
-              ),
-            ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -69,7 +57,16 @@ class ScorePage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final actualIndex = index + 3;
                         return ListTile(
-                          leading: Text("${actualIndex + 1}"),
+                          leading: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("${actualIndex + 1}",
+                                  style: const TextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary)),
+                            ],
+                          ),
                           trailing: scores[actualIndex].image == null
                               ? const Icon(Icons.album, size: 50)
                               : Image.network(scores[actualIndex].image!,
