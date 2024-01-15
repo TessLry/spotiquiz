@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotiquiz/models/score.dart';
+import 'package:spotiquiz/ui/widgets/game/scrollable_text.dart';
 import 'package:spotiquiz/utils/colors.dart';
 
 class Podium extends StatelessWidget {
@@ -13,9 +14,11 @@ class Podium extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          PodiumItem(height: 140, nb: "2", score: top3[1]),
+          PodiumItem(
+              height: 140, nb: "2", score: top3.length > 1 ? top3[1] : null),
           PodiumItem(height: 210, nb: "1", score: top3[0]),
-          PodiumItem(height: 100, nb: "3", score: top3[2]),
+          PodiumItem(
+              height: 100, nb: "3", score: top3.length > 2 ? top3[2] : null),
         ],
       ),
       Positioned(
@@ -39,7 +42,9 @@ class PodiumItem extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Image.network(score?.image ?? "", width: 50, height: 50),
+        score != null
+            ? Image.network(score?.image ?? "", width: 50, height: 50)
+            : Container(),
         const SizedBox(height: 10),
         Container(
             width: 100,
@@ -74,11 +79,23 @@ class PodiumItem extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text("${score?.score} pts \n ${score?.name}",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 15,
-                      )),
+                  score != null
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              "${score?.score} pts \n ",
+                              style: const TextStyle(fontSize: 15, height: 0.5),
+                            ),
+                            ScrollableText(
+                                text: score?.name ?? "0pts",
+                                lenghtOverflow: 13,
+                                textStyle: const TextStyle(
+                                  fontSize: 15,
+                                ))
+                          ],
+                        )
+                      : Container(),
                 ],
               ),
             )),
