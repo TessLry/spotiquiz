@@ -62,6 +62,7 @@ class _AutocompleteAnswerInputState extends State<AutocompleteAnswerInput> {
                     title: Text(_autoCompleteTracks[index].name),
                     onTap: () {
                       //TODO handleSubmit renvoie un booleen et faire affichage rouge animation si faux !
+
                       widget.handleSubmit(_autoCompleteTracks[index].name);
                       widget.textFieldController.clear();
                       setState(() {

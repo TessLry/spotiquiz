@@ -4,10 +4,21 @@ import 'package:spotiquiz/router.dart';
 import 'package:spotiquiz/utils/colors.dart';
 import 'package:spotiquiz/utils/credentials.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  bool _isLoading = false;
+
   Future<void> _handleLoginWithSpotify(BuildContext context) async {
+    setState(() {
+      _isLoading = true;
+    });
+
     await SpotifySdk.connectToSpotifyRemote(
         clientId: AppCredentials.spotifyId,
         redirectUrl: AppCredentials.redirectUrl);
@@ -27,6 +38,16 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Center(
         child: Padding(
