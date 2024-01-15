@@ -41,6 +41,23 @@ dependencies:
   lottie: ^2.7.0
   flutter_animate: ^4.3.0
   spotify_sdk: ^2.3.1
+  flutter_launcher_icons: ^0.13.1
+
+  
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/spotify.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    background_color: "#hexcode"
+    theme_color: "#hexcode"
+  windows:
+    generate: true
+    icon_size: 48
+  macos:
+    generate: true
 
 dev_dependencies:
   flutter_test:

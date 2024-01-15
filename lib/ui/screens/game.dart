@@ -26,7 +26,6 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
   String _answer = "";
   String _gamePhase = "countdown";
   int _timeLeft = 3;
-  int _songPosition = 0;
   int _currentScore = 0;
   int _score = 0;
   Timer? _timer;
@@ -82,17 +81,10 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
   Future<void> playMusic(previewUrl) async {
     await audioPlayer.play(UrlSource(previewUrl));
 
-    audioPlayer.onPositionChanged.listen((Duration d) {
-      setState(() {
-        _songPosition = d.inSeconds;
-      });
-    });
-
     audioPlayer.onPlayerComplete.listen((event) {
       setState(() {
         _textFieldController.clear();
         _timeLeft = 3;
-        _songPosition = 0;
         _currentScore = 0;
         _gamePhase = "finished";
       });
@@ -100,6 +92,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
   }
 
   bool handleSubmit(value) {
+    if (_gamePhase != "playing") return false;
     if (value == _answer) {
       int duration = 30;
       _currentScore = 0;
@@ -112,7 +105,6 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
       _textFieldController.clear();
       audioPlayer.stop();
       _timeLeft = 3;
-      _songPosition = 0;
       setState(() {
         _gamePhase = "finished";
       });
@@ -144,6 +136,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
   void dispose() {
     audioPlayer.dispose();
     _timer?.cancel();
+    _textFieldController.dispose();
     _animationController?.dispose();
 
     super.dispose();
@@ -153,6 +146,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('SpotiQuiz',
             style: TextStyle(
               color: AppColors.primary,
@@ -198,7 +192,8 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                               child: Card(
                                 elevation: 8,
                                 shadowColor: Colors.black54,
-                                color: AppColors.black,
+                                // color: AppColors.black,
+                                color: Colors.grey[900],
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)),
                                 child: (() {
@@ -211,15 +206,48 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                                       ),
                                     );
                                   } else if (_gamePhase == "playing") {
-                                    return ScaleTransition(
-                                      scale: _animationController!
-                                          .drive(Tween<double>(
-                                        begin: 0.0,
-                                        end: 1.0,
-                                      )),
-                                      child: Lottie.asset(
-                                          'assets/music_playing.json'),
-                                    );
+                                    return Stack(children: [
+                                      Center(
+                                        child: SizedBox(
+                                          width: 90,
+                                          height: 90,
+                                          child: TweenAnimationBuilder(
+                                            duration:
+                                                const Duration(seconds: 30),
+                                            tween: Tween<double>(
+                                              begin: 0.0,
+                                              end: 1.0,
+                                            ),
+                                            builder: (context, value, child) {
+                                              return CircularProgressIndicator(
+                                                value: value,
+                                                strokeWidth: 5,
+                                                backgroundColor:
+                                                    Colors.grey[900],
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                            Color>(
+                                                        AppColors.primary
+                                                            .withOpacity(0.8)),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      Center(
+                                        child: ScaleTransition(
+                                          scale: _animationController!
+                                              .drive(Tween<double>(
+                                            begin: 0.0,
+                                            end: 1.0,
+                                          )),
+                                          child: Lottie.asset(
+                                              'assets/music_playing.json',
+                                              width: 200,
+                                              height: 200),
+                                        ),
+                                      ),
+                                    ]);
                                   } else if (_gamePhase == "finished") {
                                     return Column(
                                       crossAxisAlignment:
@@ -230,6 +258,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
+                                            const SizedBox(width: 10),
                                             Image.network(
                                                 _currentTrack.album.image!,
                                                 fit: BoxFit.cover,
@@ -241,17 +270,6 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  // Text(
-                                                  //   _currentTrack.name,
-                                                  //   softWrap: false,
-                                                  //   overflow: TextOverflow.fade,
-                                                  //   style: const TextStyle(
-                                                  //     color: Colors.white,
-                                                  //     fontSize: 14,
-                                                  //     fontWeight:
-                                                  //         FontWeight.bold,
-                                                  //   ),
-                                                  // ),
                                                   ScrollableText(
                                                       text: _currentTrack.name,
                                                       textStyle:
@@ -273,17 +291,6 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                                                     ),
                                                     lenghtOverflow: 35,
                                                   )
-                                                  // Text(
-                                                  //   "${_currentTrack.artist.name} \u2022  ${_currentTrack.album.name}",
-                                                  //   softWrap: false,
-                                                  //   overflow: TextOverflow.fade,
-                                                  //   style: const TextStyle(
-                                                  //     color: AppColors.white,
-                                                  //     fontSize: 10,
-                                                  //     fontWeight:
-                                                  //         FontWeight.w600,
-                                                  //   ),
-                                                  // ),
                                                 ],
                                               ),
                                             )
