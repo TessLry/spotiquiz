@@ -24,11 +24,11 @@ class _SearchArtistState extends State<SearchArtist> {
         cursorColor: AppColors.primary,
         decoration: InputDecoration(
           labelText: 'Artiste',
-          labelStyle: TextStyle(color: AppColors.primary),
+          labelStyle: const TextStyle(color: AppColors.primary),
           suffixIcon: _isFind
-              ? Icon(Icons.check, color: AppColors.primary)
-              : Icon(Icons.search, color: Colors.grey),
-          focusedBorder: UnderlineInputBorder(
+              ? const Icon(Icons.check, color: AppColors.primary)
+              : const Icon(Icons.search, color: Colors.grey),
+          focusedBorder: const UnderlineInputBorder(
             borderSide: BorderSide(color: AppColors.primary, width: 2.0),
           ),
           focusColor: AppColors.primary,
@@ -50,15 +50,17 @@ class _SearchArtistState extends State<SearchArtist> {
           });
         },
       ),
-      Expanded(
-          child: ListView.builder(
+      ListView.builder(
+        primary: false,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: _artists.length,
         itemBuilder: (BuildContext context, int index) {
           final Artist artist = _artists[index];
           return ListTile(
             title: Text(artist.name),
             leading: artist.image == null
-                ? Icon(Icons.person, size: 50)
+                ? const Icon(Icons.person, size: 50)
                 : Image.network(artist.image!,
                     fit: BoxFit.cover, width: 50, height: 50),
             onTap: () {
@@ -71,7 +73,7 @@ class _SearchArtistState extends State<SearchArtist> {
             },
           );
         },
-      ))
+      )
     ]);
   }
 }
