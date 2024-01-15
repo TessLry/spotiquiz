@@ -7,11 +7,11 @@ import 'package:lottie/lottie.dart';
 import 'package:spotify_sdk/spotify_sdk.dart';
 import 'package:spotiquiz/bloc/score_cubit.dart';
 import 'package:spotiquiz/bloc/track_cubit.dart';
-import 'package:spotiquiz/models/score.dart';
 import 'package:spotiquiz/models/track.dart';
 import 'package:spotiquiz/ui/widgets/game/animated_add_icon.dart';
 import 'package:spotiquiz/ui/widgets/game/autocomplete_answer_input.dart';
 import 'package:spotiquiz/ui/widgets/game/countdown.dart';
+import 'package:spotiquiz/ui/widgets/game/scrollable_text.dart';
 import 'package:spotiquiz/utils/colors.dart';
 
 class Game extends StatefulWidget {
@@ -241,26 +241,49 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
-                                                    _currentTrack.name,
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    "${_currentTrack.artist.name} \u2022  ${_currentTrack.album.name}",
-                                                    softWrap: false,
-                                                    overflow: TextOverflow.fade,
-                                                    style: const TextStyle(
+                                                  // Text(
+                                                  //   _currentTrack.name,
+                                                  //   softWrap: false,
+                                                  //   overflow: TextOverflow.fade,
+                                                  //   style: const TextStyle(
+                                                  //     color: Colors.white,
+                                                  //     fontSize: 14,
+                                                  //     fontWeight:
+                                                  //         FontWeight.bold,
+                                                  //   ),
+                                                  // ),
+                                                  ScrollableText(
+                                                      text: _currentTrack.name,
+                                                      textStyle:
+                                                          const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                      lenghtOverflow: 25),
+                                                  ScrollableText(
+                                                    text:
+                                                        "${_currentTrack.artist.name} \u2022  ${_currentTrack.album.name}",
+                                                    textStyle: const TextStyle(
                                                       color: AppColors.white,
                                                       fontSize: 10,
                                                       fontWeight:
                                                           FontWeight.w600,
                                                     ),
-                                                  ),
+                                                    lenghtOverflow: 35,
+                                                  )
+                                                  // Text(
+                                                  //   "${_currentTrack.artist.name} \u2022  ${_currentTrack.album.name}",
+                                                  //   softWrap: false,
+                                                  //   overflow: TextOverflow.fade,
+                                                  //   style: const TextStyle(
+                                                  //     color: AppColors.white,
+                                                  //     fontSize: 10,
+                                                  //     fontWeight:
+                                                  //         FontWeight.w600,
+                                                  //   ),
+                                                  // ),
                                                 ],
                                               ),
                                             )
