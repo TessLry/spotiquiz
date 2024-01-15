@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotiquiz/models/album.dart';
 import 'package:spotiquiz/repositories/album_repository.dart';
+import 'package:spotiquiz/utils/colors.dart';
 
 class SearchAlbum extends StatefulWidget {
   final ValueChanged<Album> onToggle;
@@ -20,11 +21,17 @@ class _SearchAlbumState extends State<SearchAlbum> {
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
       TextField(
+        cursorColor: AppColors.primary,
         decoration: InputDecoration(
-          labelText: 'Album',
-          labelStyle: TextStyle(color: Colors.green),
-          suffixIcon: _isFind ? Icon(Icons.check) : Icon(Icons.search),
-        ),
+            labelText: 'Album',
+            labelStyle: TextStyle(color: AppColors.primary),
+            suffixIcon: _isFind
+                ? Icon(Icons.check, color: AppColors.primary)
+                : Icon(Icons.search, color: Colors.grey),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AppColors.primary, width: 2.0),
+            ),
+            focusColor: AppColors.primary),
         controller: _textFieldController,
         onChanged: (String value) async {
           if (value == "" || value.trim().length < 2) {
