@@ -45,6 +45,8 @@ class _ScrollableTextState extends State<ScrollableText>
       );
     }
 
+    //TODO essayer de right 0 à left 0
+
     return SizedBox(
       width: double.infinity,
       child: SingleChildScrollView(

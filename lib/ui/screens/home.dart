@@ -97,7 +97,15 @@ class _HomeState extends State<Home> {
                       .then((List<Track> tracks) {
                     context.read<TrackCubit>().setTracks(tracks);
 
-                    if (tracks[0].previewUrl == null) {
+                    bool hasPreview = true;
+
+                    for (final Track track in tracks) {
+                      if (track.previewUrl == null) {
+                        hasPreview = false;
+                      }
+                    }
+
+                    if (!hasPreview) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Aucun extrait audio disponible'),
@@ -116,7 +124,15 @@ class _HomeState extends State<Home> {
                       .then((List<Track> tracks) {
                     context.read<TrackCubit>().setTracks(tracks);
 
-                    if (tracks[0].previewUrl == null) {
+                    bool hasPreview = true;
+
+                    for (final Track track in tracks) {
+                      if (track.previewUrl == null) {
+                        hasPreview = false;
+                      }
+                    }
+
+                    if (!hasPreview) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Aucun extrait audio disponible'),

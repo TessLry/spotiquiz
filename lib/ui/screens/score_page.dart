@@ -10,69 +10,86 @@ class ScorePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Score> scores = BlocProvider.of<ScoreCubit>(context).state;
+    List<Score> scores =
+        triDecroissant(BlocProvider.of<ScoreCubit>(context).state);
 
-    return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            flex: 4,
-            child: Podium(top3: triDecroissant(scores).take(3).toList()),
-          ),
-          Expanded(
-            flex: 6,
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: AppColors.primary, width: 2.0),
-                  left: BorderSide(color: AppColors.primary, width: 2.0),
-                  right: BorderSide(color: AppColors.primary, width: 2.0),
-                  bottom: BorderSide(color: AppColors.primary, width: 0.0),
-                ),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
-                ),
+    if (scores.isEmpty) {
+      return const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Center(
+                child: Text(
+              "Vous n'avez pas encore de score",
+              style: TextStyle(
+                fontSize: 16.0,
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "SCORES",
-                      style: TextStyle(
-                        fontSize: 24.0,
-                      ),
+            )),
+            SizedBox(height: 20),
+            Center(child: Text("Jouez pour en avoir !"))
+          ]);
+    }
+
+    return Column(
+      children: [
+        Expanded(
+          flex: 4,
+          child: Podium(top3: scores.take(3).toList()),
+        ),
+        Expanded(
+          flex: 6,
+          child: Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(color: AppColors.primary, width: 2.0),
+                left: BorderSide(color: AppColors.primary, width: 2.0),
+                right: BorderSide(color: AppColors.primary, width: 2.0),
+                bottom: BorderSide(color: AppColors.primary, width: 0.0),
+              ),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(40),
+                topRight: Radius.circular(40),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    "SCORES",
+                    style: TextStyle(
+                      fontSize: 24.0,
                     ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: scores.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            leading: scores[index].image == null
-                                ? const Icon(Icons.album, size: 50)
-                                : Image.network(scores[index].image!,
-                                    fit: BoxFit.cover, width: 50, height: 50),
-                            title: Text("${scores[index].score} points"),
-                            titleTextStyle:
-                                const TextStyle(fontWeight: FontWeight.bold),
-                            subtitle: Text(
-                                "${scores[index].name}\n${formatDate(scores[index].date)}"),
-                            isThreeLine: true,
-                          );
-                        },
-                      ),
-                    )
-                  ],
-                ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: scores.length - 3 > 0 ? scores.length - 3 : 0,
+                      itemBuilder: (context, index) {
+                        final actualIndex = index + 3;
+                        return ListTile(
+                          leading: Text("${actualIndex + 1}"),
+                          trailing: scores[actualIndex].image == null
+                              ? const Icon(Icons.album, size: 50)
+                              : Image.network(scores[actualIndex].image!,
+                                  fit: BoxFit.cover, width: 50, height: 50),
+                          title: Text("${scores[actualIndex].score} points"),
+                          titleTextStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          subtitle: Text(
+                              "${scores[actualIndex].name}\n${formatDate(scores[actualIndex].date)}"),
+                          isThreeLine: true,
+                        );
+                      },
+                    ),
+                  )
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
