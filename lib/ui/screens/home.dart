@@ -34,47 +34,47 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          RichText(
-            text: const TextSpan(
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
-              children: <TextSpan>[
-                TextSpan(text: 'Bienvenue sur '),
-                TextSpan(
-                  text: 'SpotiQuiz ',
-                  style: TextStyle(color: AppColors.primary),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            RichText(
+              text: const TextSpan(
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
                 ),
-                TextSpan(text: '!'),
-              ],
+                children: <TextSpan>[
+                  TextSpan(text: 'Bienvenue sur '),
+                  TextSpan(
+                    text: 'SpotiQuiz ',
+                    style: TextStyle(color: AppColors.primary),
+                  ),
+                  TextSpan(text: '!'),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          const Rules(),
-          const SizedBox(height: 30),
-          ToogleButton(
-            onToggle: (value) {
-              setState(() {
-                selectedToggle = value;
-              });
-            },
-          ),
-          const SizedBox(height: 30),
-          SelectNbQuestion(
-            onToggle: (value) {
-              setState(() {
-                nbQuestion = value;
-              });
-            },
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: selectedToggle == 'artist'
+            const SizedBox(height: 10),
+            const Rules(),
+            const SizedBox(height: 30),
+            ToogleButton(
+              onToggle: (value) {
+                setState(() {
+                  selectedToggle = value;
+                });
+              },
+            ),
+            const SizedBox(height: 30),
+            SelectNbQuestion(
+              onToggle: (value) {
+                setState(() {
+                  nbQuestion = value;
+                });
+              },
+            ),
+            const SizedBox(height: 10),
+            selectedToggle == 'artist'
                 ? SearchArtist(
                     onToggle: (value) {
                       artist = value;
@@ -85,77 +85,78 @@ class _HomeState extends State<Home> {
                       album = value;
                     },
                   ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.all(10),
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(10),
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
               ),
-            ),
-            child: const Text(
-              'Lancer la partie',
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.white,
+              child: const Text(
+                'Lancer la partie',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.white,
+                ),
               ),
-            ),
-            onPressed: () {
-              final TrackRepository trackRepository = TrackRepository();
+              onPressed: () {
+                final TrackRepository trackRepository = TrackRepository();
 
-              if (artist != null || album != null) {
-                if (selectedToggle == 'artist') {
-                  trackRepository
-                      .getTracksByArtist(artist!, nbQuestion)
-                      .then((List<Track> tracks) {
-                    context.read<TrackCubit>().setTracks(tracks);
+                if (artist != null || album != null) {
+                  if (selectedToggle == 'artist') {
+                    trackRepository
+                        .getTracksByArtist(artist!, nbQuestion)
+                        .then((List<Track> tracks) {
+                      context.read<TrackCubit>().setTracks(tracks);
 
-                    if (tracks[0].previewUrl == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Aucun extrait audio disponible'),
-                        ),
-                      );
-                    } else {
-                      BlocProvider.of<ScoreCubit>(context).addScore(Score(
-                          0, DateTime.now(), artist!.name, artist!.image));
+                      if (tracks[0].previewUrl == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Aucun extrait audio disponible'),
+                          ),
+                        );
+                      } else {
+                        BlocProvider.of<ScoreCubit>(context).addScore(Score(
+                            0, DateTime.now(), artist!.name, artist!.image));
 
-                      Navigator.pushNamed(context, '/game');
-                    }
-                  });
+                        Navigator.pushNamed(context, '/game');
+                      }
+                    });
+                  } else {
+                    trackRepository
+                        .getTracksByAlbum(album!, nbQuestion)
+                        .then((List<Track> tracks) {
+                      context.read<TrackCubit>().setTracks(tracks);
+
+                      if (tracks[0].previewUrl == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Aucun extrait audio disponible'),
+                          ),
+                        );
+                      } else {
+                        BlocProvider.of<ScoreCubit>(context).addScore(Score(
+                            0, DateTime.now(), album!.name, album!.image));
+
+                        Navigator.pushNamed(context, '/game');
+                      }
+                    });
+                  }
                 } else {
-                  trackRepository
-                      .getTracksByAlbum(album!, nbQuestion)
-                      .then((List<Track> tracks) {
-                    context.read<TrackCubit>().setTracks(tracks);
-
-                    if (tracks[0].previewUrl == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Aucun extrait audio disponible'),
-                        ),
-                      );
-                    } else {
-                      BlocProvider.of<ScoreCubit>(context).addScore(
-                          Score(0, DateTime.now(), album!.name, album!.image));
-
-                      Navigator.pushNamed(context, '/game');
-                    }
-                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text('Veuillez sélectionner un artiste ou un album'),
+                    ),
+                  );
                 }
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Veuillez sélectionner un artiste ou un album'),
-                  ),
-                );
-              }
-            },
-          )
-        ],
+              },
+            )
+          ],
+        ),
       ),
     );
   }
