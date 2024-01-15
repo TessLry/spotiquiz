@@ -8,39 +8,16 @@ import 'package:spotiquiz/utils/colors.dart';
 class ScorePage extends StatelessWidget {
   const ScorePage({super.key});
 
-  static List list = [
-    {"score": 1300, "date": "2021-09-01 12:00:00", "nom": "Pnl"},
-    {"score": 1200, "date": "2021-09-01 12:00:00", "nom": "Pnl"},
-    {"score": 1100, "date": "2021-09-01 12:00:00", "nom": "Pnl"},
-    {"score": 1000, "date": "2021-09-01 12:00:00", "nom": "Pnl"},
-    {"score": 900, "date": "2021-09-01 12:00:00", "nom": "Pnl"},
-    {"score": 800, "date": "2021-09-01 12:00:00", "nom": "Pnl"},
-    {"score": 700, "date": "2021-09-01 12:00:00", "nom": "Pnl"},
-    {"score": 600, "date": "2021-09-01 12:00:00", "nom": "Pnl"},
-    {"score": 500, "date": "2021-09-01 12:00:00", "nom": "Pnl"}
-  ];
-
   @override
   Widget build(BuildContext context) {
+    List<Score> scores = BlocProvider.of<ScoreCubit>(context).state;
+
     return Scaffold(
-      // body: BlocBuilder<ScoreCubit, List<Score>>(
-      //   builder: (context, state) {
-      //     return ListView.builder(
-      //       itemCount: state.length,
-      //       itemBuilder: (context, index) {
-      //         return ListTile(
-      //           title: Text(state[index].score.toString()),
-      //           subtitle: Text(state[index].date.toString()),
-      //         );
-      //       },
-      //     );
-      //   },
-      // ),
       body: Column(
         children: [
-          const Expanded(
+          Expanded(
             flex: 4,
-            child: Podium(),
+            child: Podium(top3: triDecroissant(scores).take(3).toList()),
           ),
           Expanded(
             flex: 6,
@@ -59,12 +36,12 @@ class ScorePage extends StatelessWidget {
                 ),
               ),
               child: Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       "SCORES",
                       style: TextStyle(
                         fontSize: 24.0,
@@ -72,12 +49,19 @@ class ScorePage extends StatelessWidget {
                     ),
                     Expanded(
                       child: ListView.builder(
-                        itemCount: list.length,
+                        itemCount: scores.length,
                         itemBuilder: (context, index) {
                           return ListTile(
-                            title: Text(list[index]["score"].toString()),
+                            leading: scores[index].image == null
+                                ? const Icon(Icons.album, size: 50)
+                                : Image.network(scores[index].image!,
+                                    fit: BoxFit.cover, width: 50, height: 50),
+                            title: Text("${scores[index].score} points"),
+                            titleTextStyle:
+                                const TextStyle(fontWeight: FontWeight.bold),
                             subtitle: Text(
-                                "${list[index]["date"]} ${list[index]["nom"]}"),
+                                "${scores[index].name}\n${formatDate(scores[index].date)}"),
+                            isThreeLine: true,
                           );
                         },
                       ),
@@ -91,4 +75,13 @@ class ScorePage extends StatelessWidget {
       ),
     );
   }
+}
+
+formatDate(DateTime date) {
+  return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} - ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+}
+
+List<Score> triDecroissant(List<Score> scores) {
+  scores.sort((a, b) => b.score.compareTo(a.score));
+  return scores;
 }
