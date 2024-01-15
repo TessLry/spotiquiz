@@ -24,11 +24,11 @@ class _SearchAlbumState extends State<SearchAlbum> {
         cursorColor: AppColors.primary,
         decoration: InputDecoration(
             labelText: 'Album',
-            labelStyle: TextStyle(color: AppColors.primary),
+            labelStyle: const TextStyle(color: AppColors.primary),
             suffixIcon: _isFind
-                ? Icon(Icons.check, color: AppColors.primary)
-                : Icon(Icons.search, color: Colors.grey),
-            focusedBorder: UnderlineInputBorder(
+                ? const Icon(Icons.check, color: AppColors.primary)
+                : const Icon(Icons.search, color: Colors.grey),
+            focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: AppColors.primary, width: 2.0),
             ),
             focusColor: AppColors.primary),
@@ -48,15 +48,17 @@ class _SearchAlbumState extends State<SearchAlbum> {
           });
         },
       ),
-      Expanded(
-          child: ListView.builder(
+      ListView.builder(
+        primary: false,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: _albums.length,
         itemBuilder: (BuildContext context, int index) {
           final Album album = _albums[index];
           return ListTile(
             title: Text(album.name),
             leading: album.image == null
-                ? Icon(Icons.album, size: 50)
+                ? const Icon(Icons.album, size: 50)
                 : Image.network(album.image!,
                     fit: BoxFit.cover, width: 50, height: 50),
             onTap: () {
@@ -69,7 +71,7 @@ class _SearchAlbumState extends State<SearchAlbum> {
             },
           );
         },
-      ))
+      )
     ]);
   }
 }
