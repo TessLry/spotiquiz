@@ -90,28 +90,53 @@ class _HomeState extends State<Home> {
             onPressed: () {
               final TrackRepository trackRepository = TrackRepository();
 
-              if (selectedToggle == 'artist') {
-                trackRepository
-                    .getTracksByArtist(artist!, nbQuestion)
-                    .then((List<Track> tracks) {
-                  context.read<TrackCubit>().setTracks(tracks);
+              if (artist != null || album != null) {
+                if (selectedToggle == 'artist') {
+                  trackRepository
+                      .getTracksByArtist(artist!, nbQuestion)
+                      .then((List<Track> tracks) {
+                    context.read<TrackCubit>().setTracks(tracks);
 
-                  BlocProvider.of<ScoreCubit>(context).addScore(
-                      Score(0, DateTime.now(), artist!.name, artist!.image));
+                    if (tracks[0].previewUrl == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Aucun extrait audio disponible'),
+                        ),
+                      );
+                    } else {
+                      BlocProvider.of<ScoreCubit>(context).addScore(Score(
+                          0, DateTime.now(), artist!.name, artist!.image));
 
-                  Navigator.pushNamed(context, '/game');
-                });
+                      Navigator.pushNamed(context, '/game');
+                    }
+                  });
+                } else {
+                  trackRepository
+                      .getTracksByAlbum(album!, nbQuestion)
+                      .then((List<Track> tracks) {
+                    context.read<TrackCubit>().setTracks(tracks);
+
+                    if (tracks[0].previewUrl == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Aucun extrait audio disponible'),
+                        ),
+                      );
+                    } else {
+                      BlocProvider.of<ScoreCubit>(context).addScore(
+                          Score(0, DateTime.now(), album!.name, album!.image));
+
+                      Navigator.pushNamed(context, '/game');
+                    }
+                  });
+                }
               } else {
-                trackRepository
-                    .getTracksByAlbum(album!, nbQuestion)
-                    .then((List<Track> tracks) {
-                  context.read<TrackCubit>().setTracks(tracks);
-
-                  BlocProvider.of<ScoreCubit>(context).addScore(
-                      Score(0, DateTime.now(), album!.name, album!.image));
-
-                  Navigator.pushNamed(context, '/game');
-                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content:
+                        Text('Veuillez sélectionner un artiste ou un album'),
+                  ),
+                );
               }
             },
             backgroundColor: AppColors.primary,

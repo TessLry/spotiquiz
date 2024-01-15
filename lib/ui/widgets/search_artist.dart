@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotiquiz/models/artist.dart';
 import 'package:spotiquiz/repositories/artist_repository.dart';
+import 'package:spotiquiz/utils/colors.dart';
 
 class SearchArtist extends StatefulWidget {
   final ValueChanged<Artist> onToggle;
@@ -20,10 +21,17 @@ class _SearchArtistState extends State<SearchArtist> {
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
       TextField(
+        cursorColor: AppColors.primary,
         decoration: InputDecoration(
           labelText: 'Artiste',
-          labelStyle: TextStyle(color: Colors.green),
-          suffixIcon: _isFind ? Icon(Icons.check) : Icon(Icons.search),
+          labelStyle: TextStyle(color: AppColors.primary),
+          suffixIcon: _isFind
+              ? Icon(Icons.check, color: AppColors.primary)
+              : Icon(Icons.search, color: Colors.grey),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: AppColors.primary, width: 2.0),
+          ),
+          focusColor: AppColors.primary,
         ),
         controller: _textFieldController,
         onChanged: (String value) async {
