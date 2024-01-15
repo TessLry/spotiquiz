@@ -86,7 +86,22 @@ class _HomeState extends State<Home> {
                     },
                   ),
           ),
-          FloatingActionButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.all(10),
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            child: const Text(
+              'Lancer la partie',
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColors.white,
+              ),
+            ),
             onPressed: () {
               final TrackRepository trackRepository = TrackRepository();
 
@@ -139,8 +154,6 @@ class _HomeState extends State<Home> {
                 );
               }
             },
-            backgroundColor: AppColors.primary,
-            child: const Icon(Icons.play_arrow),
           )
         ],
       ),
